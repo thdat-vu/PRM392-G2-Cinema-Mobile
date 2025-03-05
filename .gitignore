@@ -1,0 +1,42 @@
+# Android Studio/IDEA files
+*.iml
+/.idea/
+# /.idea/caches
+# /.idea/libraries
+# /.idea/modules.xml
+# /.idea/workspace.xml
+# /.idea/navEditor.xml
+# /.idea/assetWizardSettings.xml
+# /.idea/misc.xml
+
+# Gradle files
+.gradle/
+build/
+app/build/
+*.apk
+*.aab
+
+# Local configuration files
+local.properties
+
+# Native build files
+.externalNativeBuild
+.cxx
+
+# Log files
+*.log
+
+# Temporary files
+*~
+*.swp
+
+# macOS files
+.DS_Store
+
+# Sensitive configuration files
+app/google-services.json
+secrets.properties
+*.jks
+
+# Captures from Android Studio
+/captures
