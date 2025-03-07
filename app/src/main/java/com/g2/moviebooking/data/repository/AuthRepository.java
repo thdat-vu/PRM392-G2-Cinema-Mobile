@@ -1,5 +1,6 @@
 package com.g2.moviebooking.data.repository;
 
+import android.content.Context;
 import com.g2.moviebooking.data.remote.api.ApiService;
 import com.g2.moviebooking.data.remote.model.GoogleTokenRequest;
 import com.g2.moviebooking.data.remote.model.LoginResponse;
@@ -10,8 +11,8 @@ import retrofit2.Callback;
 public class AuthRepository {
     private ApiService apiService;
 
-    public AuthRepository() {
-        apiService = RetrofitClient.getInstance().create(ApiService.class);
+    public AuthRepository(Context context) {
+        apiService = RetrofitClient.getInstance(context).create(ApiService.class);
     }
 
     public void loginWithGoogle(String idToken, Callback<LoginResponse> callback) {

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/nav_movies"
+        android:icon="@drawable/ic_movie"
+        android:title="Phim" />
+    <item
+        android:id="@+id/nav_theatres"
+        android:icon="@drawable/ic_theatre"
+        android:title="Rạp" />
+    <item
+        android:id="@+id/nav_tickets"
+        android:icon="@drawable/ic_ticket"
+        android:title="Vé của tôi" />
+    <item
+        android:id="@+id/nav_profile"
+        android:icon="@drawable/ic_profile"
+        android:title="Tài khoản" />
+</menu>

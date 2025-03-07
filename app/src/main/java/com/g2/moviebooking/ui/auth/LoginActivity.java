@@ -9,8 +9,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.g2.moviebooking.R;
 import com.g2.moviebooking.data.remote.model.GoogleTokenRequest;
 import com.g2.moviebooking.data.remote.model.LoginResponse;
-import com.g2.moviebooking.data.remote.api.ApiService;
-import com.g2.moviebooking.utils.RetrofitClient;
+import com.g2.moviebooking.data.repository.AuthRepository; // Thêm import
+import com.g2.moviebooking.ui.MovieListActivity;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -24,15 +24,15 @@ import retrofit2.Response;
 public class LoginActivity extends AppCompatActivity {
     private static final int RC_SIGN_IN = 9001;
     private GoogleSignInClient googleSignInClient;
-    private ApiService apiService;
+    private AuthRepository authRepository; // Thay ApiService bằng AuthRepository
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        // Khởi tạo Retrofit
-        apiService = RetrofitClient.getInstance().create(ApiService.class);
+        // Khởi tạo AuthRepository
+        authRepository = new AuthRepository(this);
 
         // Cấu hình Google Sign-In
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -67,9 +67,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void sendTokenToBackend(String idToken) {
-        GoogleTokenRequest request = new GoogleTokenRequest(idToken);
-        Call<LoginResponse> call = apiService.loginWithGoogle(request);
-        call.enqueue(new Callback<LoginResponse>() {
+        authRepository.loginWithGoogle(idToken, new Callback<LoginResponse>() {
             @Override
             public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
@@ -93,5 +91,10 @@ public class LoginActivity extends AppCompatActivity {
         SharedPreferences.Editor editor = prefs.edit();
         editor.putString("jwt_token", jwtToken);
         editor.apply();
+
+        // Điều hướng sang MovieListActivity
+        Intent intent = new Intent(LoginActivity.this, MovieListActivity.class);
+        startActivity(intent);
+        finish(); // Đóng LoginActivity
     }
 }
