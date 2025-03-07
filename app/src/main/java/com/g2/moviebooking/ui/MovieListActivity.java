@@ -1,6 +1,7 @@
 package com.g2.moviebooking.ui;
 
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -19,6 +20,7 @@ public class MovieListActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private MovieAdapter movieAdapter;
     private MovieRepository movieRepository;
+    private LinearLayoutManager layoutManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,7 +28,14 @@ public class MovieListActivity extends AppCompatActivity {
         setContentView(R.layout.activity_movie_list);
 
         recyclerView = findViewById(R.id.recycler_view_movies);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
+        recyclerView.setLayoutManager(layoutManager);
+
+        // Thêm padding để item đầu tiên không bị cắt khi scroll
+        int padding = getResources().getDimensionPixelSize(R.dimen.recycler_view_padding);
+        recyclerView.setPadding(padding, 0, padding, 0);
+        recyclerView.setClipToPadding(false);
+
         movieAdapter = new MovieAdapter(new ArrayList<>());
         recyclerView.setAdapter(movieAdapter);
 
@@ -34,11 +43,53 @@ public class MovieListActivity extends AppCompatActivity {
         PagerSnapHelper snapHelper = new PagerSnapHelper();
         snapHelper.attachToRecyclerView(recyclerView);
 
-        // Đảm bảo item đầu tiên được căn giữa khi khởi động
-        recyclerView.scrollToPosition(0);
+        // Thêm listener để theo dõi item focus và áp dụng hiệu ứng scale
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                applyScaleEffect();
+            }
+
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    applyScaleEffect();
+                }
+            }
+        });
 
         movieRepository = new MovieRepository(this);
         fetchMovies();
+    }
+
+    private void applyScaleEffect() {
+        int centerOfScreen = recyclerView.getWidth() / 2;
+
+        for (int i = 0; i < recyclerView.getChildCount(); i++) {
+            View child = recyclerView.getChildAt(i);
+            int childCenter = (child.getLeft() + child.getRight()) / 2;
+            float distanceFromCenter = Math.abs(childCenter - centerOfScreen);
+
+            // Tính toán scale dựa trên khoảng cách từ center
+            float scale = Math.max(0.85f, 1f - 0.15f * (distanceFromCenter / centerOfScreen));
+
+            // Áp dụng scale cho view
+            child.setScaleX(scale);
+            child.setScaleY(scale);
+
+            // Điều chỉnh độ trong suốt (tùy chọn)
+            float alpha = Math.max(0.7f, 1f - 0.3f * (distanceFromCenter / centerOfScreen));
+            child.setAlpha(alpha);
+
+            // Item ở center sẽ hiển thị phía trước
+            if (scale > 0.95f) {
+                child.setElevation(10f);
+            } else {
+                child.setElevation(5f);
+            }
+        }
     }
 
     private void fetchMovies() {
@@ -47,10 +98,15 @@ public class MovieListActivity extends AppCompatActivity {
             public void onResponse(Call<List<Movie>> call, Response<List<Movie>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     movieAdapter.updateMovies(response.body());
-                    // Cuộn đến item đầu tiên sau khi load dữ liệu
-                    if (!response.body().isEmpty()) {
-                        recyclerView.scrollToPosition(0);
-                    }
+
+                    // Đảm bảo item đầu tiên được hiển thị đúng
+                    recyclerView.post(() -> {
+                        if (!response.body().isEmpty()) {
+                            recyclerView.scrollToPosition(0);
+                            // Cần áp dụng hiệu ứng scale sau khi scroll
+                            applyScaleEffect();
+                        }
+                    });
                 } else {
                     Toast.makeText(MovieListActivity.this, "Lỗi khi tải danh sách phim: " + response.code(), Toast.LENGTH_SHORT).show();
                 }
@@ -61,5 +117,14 @@ public class MovieListActivity extends AppCompatActivity {
                 Toast.makeText(MovieListActivity.this, "Lỗi mạng: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Fix lỗi khi quay lại không hiển thị đúng
+        if (movieAdapter.getItemCount() > 0) {
+            recyclerView.post(this::applyScaleEffect);
+        }
     }
 }
