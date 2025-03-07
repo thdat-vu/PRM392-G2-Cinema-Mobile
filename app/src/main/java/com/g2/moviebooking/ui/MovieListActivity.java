@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.PagerSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
 import com.g2.moviebooking.R;
 import com.g2.moviebooking.data.remote.model.Movie;
@@ -25,11 +26,18 @@ public class MovieListActivity extends AppCompatActivity {
         setContentView(R.layout.activity_movie_list);
 
         recyclerView = findViewById(R.id.recycler_view_movies);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
         movieAdapter = new MovieAdapter(new ArrayList<>());
         recyclerView.setAdapter(movieAdapter);
 
-        movieRepository = new MovieRepository(this); // Truyền Context
+        // Thêm PagerSnapHelper để lướt từng item và căn giữa
+        PagerSnapHelper snapHelper = new PagerSnapHelper();
+        snapHelper.attachToRecyclerView(recyclerView);
+
+        // Đảm bảo item đầu tiên được căn giữa khi khởi động
+        recyclerView.scrollToPosition(0);
+
+        movieRepository = new MovieRepository(this);
         fetchMovies();
     }
 
@@ -39,6 +47,10 @@ public class MovieListActivity extends AppCompatActivity {
             public void onResponse(Call<List<Movie>> call, Response<List<Movie>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     movieAdapter.updateMovies(response.body());
+                    // Cuộn đến item đầu tiên sau khi load dữ liệu
+                    if (!response.body().isEmpty()) {
+                        recyclerView.scrollToPosition(0);
+                    }
                 } else {
                     Toast.makeText(MovieListActivity.this, "Lỗi khi tải danh sách phim: " + response.code(), Toast.LENGTH_SHORT).show();
                 }
