@@ -1,4 +1,4 @@
-package com.g2.moviebooking.data.remote.model;
+package com.g2.moviebooking.data.remote.model.Entity;
 
 import com.google.gson.annotations.SerializedName;
 
