@@ -12,13 +12,14 @@ import com.bumptech.glide.Glide;
 import com.g2.moviebooking.R;
 import com.g2.moviebooking.data.remote.model.Entity.Movie;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHolder> {
-    private List<Movie> movies;
+    private final List<Movie> movies;
 
     public MovieAdapter(List<Movie> movies) {
-        this.movies = movies;
+        this.movies = movies != null ? movies : new ArrayList<>();
     }
 
     @Override
@@ -42,11 +43,18 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
 
     @Override
     public int getItemCount() {
-        return movies != null ? movies.size() : 0;
+        return movies.size();
+    }
+
+    public void addMovies(List<Movie> newMovies) {
+        int startPosition = movies.size();
+        movies.addAll(newMovies);
+        notifyItemRangeInserted(startPosition, newMovies.size());
     }
 
     public void updateMovies(List<Movie> newMovies) {
-        this.movies = newMovies;
+        movies.clear();
+        movies.addAll(newMovies);
         notifyDataSetChanged();
     }
 
