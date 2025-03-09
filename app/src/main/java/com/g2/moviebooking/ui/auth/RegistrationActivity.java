@@ -16,25 +16,42 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class RegistrationActivity extends AppCompatActivity {
+    // UI components
+    private EditText etName;
+    private EditText etEmail;
+    private EditText etPassword;
+    private EditText etPhone;
+    private Button btnRegister;
+    private Button btnBackToLogin;
+
+    // Repository
     private AuthRepository authRepository;
-    private EditText etName, etEmail, etPassword, etPhone;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_registration);
 
+        // Khởi tạo repository
         authRepository = new AuthRepository(this);
 
-        // Initialize views
+        // Khởi tạo UI
+        setupViews();
+
+        // Gán sự kiện cho các button
+        setupListeners();
+    }
+
+    private void setupViews() {
         etName = findViewById(R.id.et_name);
         etEmail = findViewById(R.id.et_email);
         etPassword = findViewById(R.id.et_password);
         etPhone = findViewById(R.id.et_phone);
-        Button btnRegister = findViewById(R.id.btn_register);
-        Button btnBackToLogin = findViewById(R.id.btn_back_to_login);
+        btnRegister = findViewById(R.id.btn_register);
+        btnBackToLogin = findViewById(R.id.btn_back_to_login);
+    }
 
-        // Button click listeners
+    private void setupListeners() {
         btnRegister.setOnClickListener(v -> register());
         btnBackToLogin.setOnClickListener(v -> finish());
     }
@@ -46,29 +63,36 @@ public class RegistrationActivity extends AppCompatActivity {
         String phone = etPhone.getText().toString().trim();
 
         if (name.isEmpty() || email.isEmpty() || password.isEmpty() || phone.isEmpty()) {
-            Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show();
+            showToast("Vui lòng điền đầy đủ thông tin");
             return;
         }
 
         authRepository.register(name, email, password, phone, new Callback<RegistrationResponse>() {
             @Override
             public void onResponse(Call<RegistrationResponse> call, Response<RegistrationResponse> response) {
-                if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
-                    Toast.makeText(RegistrationActivity.this, "Registration successful! Please login",
-                            Toast.LENGTH_SHORT).show();
-                    finish(); // Return to LoginActivity
-                } else {
-                    String message = response.body() != null ? response.body().getMessage() :
-                            "Registration failed: " + response.code();
-                    Toast.makeText(RegistrationActivity.this, message, Toast.LENGTH_SHORT).show();
-                }
+                handleRegistrationResponse(response);
             }
 
             @Override
             public void onFailure(Call<RegistrationResponse> call, Throwable t) {
-                Toast.makeText(RegistrationActivity.this, "Network error: " + t.getMessage(),
-                        Toast.LENGTH_SHORT).show();
+                showToast("Lỗi mạng: " + t.getMessage());
             }
         });
+    }
+
+    // Xử lý phản hồi đăng ký
+    private void handleRegistrationResponse(Response<RegistrationResponse> response) {
+        if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+            showToast("Đăng ký thành công! Vui lòng đăng nhập");
+            finish();
+        } else {
+            String message = response.body() != null ? response.body().getMessage() : "Đăng ký thất bại: " + response.code();
+            showToast(message);
+        }
+    }
+
+    // Hiển thị thông báo
+    private void showToast(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 }

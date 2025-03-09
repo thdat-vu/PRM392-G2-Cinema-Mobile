@@ -24,14 +24,16 @@ public class RetrofitClient {
     private static final String BASE_URL = "https://prm-392-g2-cinema.vercel.app/";
     private static final String PREFS_NAME = "MyPrefs";
     private static final String TOKEN_KEY = "jwt_token";
+
     private static volatile Retrofit retrofit;
     private static volatile OkHttpClient okHttpClient;
     private static Context appContext;
 
     private RetrofitClient() {
-        // Prevent instantiation
+        // Ngăn khởi tạo instance
     }
 
+    // Khởi tạo Retrofit instance
     public static Retrofit getInstance(Context context) {
         if (retrofit == null) {
             synchronized (RetrofitClient.class) {
@@ -49,6 +51,7 @@ public class RetrofitClient {
         return retrofit;
     }
 
+    // Tạo OkHttpClient với interceptor và authenticator
     private static OkHttpClient buildOkHttpClient(Context context) {
         return new OkHttpClient.Builder()
                 .addInterceptor(new AuthInterceptor(context))
@@ -59,54 +62,7 @@ public class RetrofitClient {
                 .build();
     }
 
-    private static class AuthInterceptor implements Interceptor {
-        private final Context context;
-
-        AuthInterceptor(Context context) {
-            this.context = context.getApplicationContext();
-        }
-
-        @NonNull
-        @Override
-        public Response intercept(@NonNull Chain chain) throws IOException {
-            Request originalRequest = chain.request();
-            String token = getToken(context);
-
-            Request modifiedRequest = originalRequest;
-            if (token != null) {
-                modifiedRequest = originalRequest.newBuilder()
-                        .header("Authorization", "Bearer " + token)
-                        .build();
-            }
-
-            Response response = chain.proceed(modifiedRequest);
-            if (response.code() == 401) {
-                navigateToLogin();
-            }
-            return response;
-        }
-    }
-
-    private static class TokenAuthenticator implements Authenticator {
-        private final Context context;
-
-        TokenAuthenticator(Context context) {
-            this.context = context.getApplicationContext();
-        }
-
-        @Override
-        public Request authenticate(Route route, @NonNull Response response) {
-            synchronized (this) {
-                String currentToken = getToken(context);
-                if (currentToken != null) {
-                    clearToken(context);
-                    navigateToLogin();
-                }
-            }
-            return null;
-        }
-    }
-
+    // Quản lý token
     public static void setToken(Context context, String token) {
         SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         prefs.edit().putString(TOKEN_KEY, token).apply();
@@ -133,6 +89,56 @@ public class RetrofitClient {
         return getToken(context) != null;
     }
 
+    // Interceptor để thêm token vào header
+    private static class AuthInterceptor implements Interceptor {
+        private final Context context;
+
+        AuthInterceptor(Context context) {
+            this.context = context.getApplicationContext();
+        }
+
+        @NonNull
+        @Override
+        public Response intercept(@NonNull Chain chain) throws IOException {
+            Request originalRequest = chain.request();
+            String token = getToken(context);
+
+            Request modifiedRequest = token != null
+                    ? originalRequest.newBuilder()
+                    .header("Authorization", "Bearer " + token)
+                    .build()
+                    : originalRequest;
+
+            Response response = chain.proceed(modifiedRequest);
+            if (response.code() == 401) {
+                navigateToLogin();
+            }
+            return response;
+        }
+    }
+
+    // Authenticator để xử lý khi token hết hạn
+    private static class TokenAuthenticator implements Authenticator {
+        private final Context context;
+
+        TokenAuthenticator(Context context) {
+            this.context = context.getApplicationContext();
+        }
+
+        @Override
+        public Request authenticate(Route route, @NonNull Response response) {
+            synchronized (this) {
+                String currentToken = getToken(context);
+                if (currentToken != null) {
+                    clearToken(context);
+                    navigateToLogin();
+                }
+            }
+            return null;
+        }
+    }
+
+    // Điều hướng về LoginActivity
     private static void navigateToLogin() {
         if (appContext != null) {
             Intent intent = new Intent(appContext, LoginActivity.class);

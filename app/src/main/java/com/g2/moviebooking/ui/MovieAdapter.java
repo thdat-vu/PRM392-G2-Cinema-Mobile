@@ -31,11 +31,13 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
     @Override
     public void onBindViewHolder(MovieViewHolder holder, int position) {
         Movie movie = movies.get(position);
+        // Tải banner bằng Glide
         Glide.with(holder.itemView.getContext())
                 .load(movie.getBanner())
                 .placeholder(R.drawable.ic_launcher_background)
                 .error(R.drawable.ic_launcher_background)
                 .into(holder.imageViewBanner);
+
         holder.titleTextView.setText(movie.getTitle());
         holder.ratingTextView.setText(String.format("%.1f", movie.getRating()));
         holder.genresTextView.setText(String.join(", ", movie.getGenres() != null ? movie.getGenres() : new String[]{}));
@@ -46,12 +48,14 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
         return movies.size();
     }
 
+    // Thêm danh sách phim mới
     public void addMovies(List<Movie> newMovies) {
         int startPosition = movies.size();
         movies.addAll(newMovies);
         notifyItemRangeInserted(startPosition, newMovies.size());
     }
 
+    // Cập nhật toàn bộ danh sách phim
     public void updateMovies(List<Movie> newMovies) {
         movies.clear();
         movies.addAll(newMovies);
@@ -60,7 +64,9 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
 
     static class MovieViewHolder extends RecyclerView.ViewHolder {
         ImageView imageViewBanner;
-        TextView titleTextView, ratingTextView, genresTextView;
+        TextView titleTextView;
+        TextView ratingTextView;
+        TextView genresTextView;
 
         MovieViewHolder(View itemView) {
             super(itemView);

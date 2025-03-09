@@ -26,43 +26,56 @@ import retrofit2.Response;
 
 public class LoginActivity extends AppCompatActivity {
     private static final int RC_SIGN_IN = 9001;
-    private GoogleSignInClient googleSignInClient;
+
+    // UI components
+    private EditText etEmail;
+    private EditText etPassword;
+    private Button btnLogin;
+    private Button btnRegister;
+    private Button btnGoogleSignIn;
+
+    // Authentication components
     private AuthRepository authRepository;
-    private EditText etEmail, etPassword;
+    private GoogleSignInClient googleSignInClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
+        // Khởi tạo repository
         authRepository = new AuthRepository(this);
 
-        // Initialize views
+        // Khởi tạo UI
+        setupViews();
+
+        // Cấu hình Google Sign-In
+        setupGoogleSignIn();
+
+        // Gán sự kiện cho các button
+        setupListeners();
+    }
+
+    private void setupViews() {
         etEmail = findViewById(R.id.et_email);
         etPassword = findViewById(R.id.et_password);
-        Button btnLogin = findViewById(R.id.btn_login);
-        Button btnRegister = findViewById(R.id.btn_register);
-        Button btnGoogleSignIn = findViewById(R.id.btn_google_sign_in);
+        btnLogin = findViewById(R.id.btn_login);
+        btnRegister = findViewById(R.id.btn_register);
+        btnGoogleSignIn = findViewById(R.id.btn_google_sign_in);
+    }
 
-        // Google Sign-In configuration
+    private void setupGoogleSignIn() {
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
                 .requestEmail()
                 .build();
         googleSignInClient = GoogleSignIn.getClient(this, gso);
-
-        // Button click listeners
-        btnLogin.setOnClickListener(v -> login());
-        btnRegister.setOnClickListener(v -> {
-            Intent intent = new Intent(LoginActivity.this, RegistrationActivity.class);
-            startActivity(intent);
-        });
-        btnGoogleSignIn.setOnClickListener(v -> signInWithGoogle());
     }
 
-    private void signInWithGoogle() {
-        Intent signInIntent = googleSignInClient.getSignInIntent();
-        startActivityForResult(signInIntent, RC_SIGN_IN);
+    private void setupListeners() {
+        btnLogin.setOnClickListener(v -> login());
+        btnRegister.setOnClickListener(v -> startActivity(new Intent(this, RegistrationActivity.class)));
+        btnGoogleSignIn.setOnClickListener(v -> signInWithGoogle());
     }
 
     private void login() {
@@ -70,30 +83,26 @@ public class LoginActivity extends AppCompatActivity {
         String password = etPassword.getText().toString().trim();
 
         if (email.isEmpty() || password.isEmpty()) {
-            Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show();
+            showToast("Vui lòng điền đầy đủ thông tin");
             return;
         }
 
         authRepository.login(email, password, new Callback<LoginResponse>() {
             @Override
             public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    String jwtToken = response.body().getJwtToken();
-                    RetrofitClient.setToken(LoginActivity.this, jwtToken);
-                    Toast.makeText(LoginActivity.this, "Login successful!", Toast.LENGTH_SHORT).show();
-                    navigateToMovieList();
-                } else {
-                    Toast.makeText(LoginActivity.this, "Login failed: " + response.code(),
-                            Toast.LENGTH_SHORT).show();
-                }
+                handleLoginResponse(response);
             }
 
             @Override
             public void onFailure(Call<LoginResponse> call, Throwable t) {
-                Toast.makeText(LoginActivity.this, "Network error: " + t.getMessage(),
-                        Toast.LENGTH_SHORT).show();
+                handleNetworkError(t);
             }
         });
+    }
+
+    private void signInWithGoogle() {
+        Intent signInIntent = googleSignInClient.getSignInIntent();
+        startActivityForResult(signInIntent, RC_SIGN_IN);
     }
 
     @Override
@@ -106,7 +115,7 @@ public class LoginActivity extends AppCompatActivity {
                 String idToken = account.getIdToken();
                 sendTokenToBackend(idToken);
             } catch (ApiException e) {
-                Toast.makeText(this, "Google Sign-In failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                showToast("Đăng nhập Google thất bại: " + e.getMessage());
             }
         }
     }
@@ -115,31 +124,46 @@ public class LoginActivity extends AppCompatActivity {
         authRepository.loginWithGoogle(idToken, new Callback<LoginResponse>() {
             @Override
             public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    String jwtToken = response.body().getJwtToken();
-                    RetrofitClient.setToken(LoginActivity.this, jwtToken);
-                    navigateToMovieList();
-                } else {
-                    Toast.makeText(LoginActivity.this, "Google login failed: " + response.code(),
-                            Toast.LENGTH_SHORT).show();
-                }
+                handleLoginResponse(response);
             }
 
             @Override
             public void onFailure(Call<LoginResponse> call, Throwable t) {
-                Toast.makeText(LoginActivity.this, "Network error: " + t.getMessage(),
-                        Toast.LENGTH_SHORT).show();
+                handleNetworkError(t);
             }
         });
     }
 
+    // Xử lý phản hồi đăng nhập
+    private void handleLoginResponse(Response<LoginResponse> response) {
+        if (response.isSuccessful() && response.body() != null) {
+            String jwtToken = response.body().getJwtToken();
+            RetrofitClient.setToken(this, jwtToken);
+            showToast("Đăng nhập thành công!");
+            navigateToMovieList();
+        } else {
+            showToast("Đăng nhập thất bại: " + response.code());
+        }
+    }
+
+    // Xử lý lỗi mạng
+    private void handleNetworkError(Throwable t) {
+        showToast("Lỗi mạng: " + t.getMessage());
+    }
+
+    // Điều hướng đến MovieListActivity
     private void navigateToMovieList() {
-        Intent intent = new Intent(LoginActivity.this, MovieListActivity.class);
+        Intent intent = new Intent(this, MovieListActivity.class);
         startActivity(intent);
         finish();
     }
 
-    // Optional: Add logout method if needed
+    // Hiển thị thông báo
+    private void showToast(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    }
+
+    // Phương thức logout (nếu cần)
     public void logout() {
         RetrofitClient.clearToken(this);
         Intent intent = new Intent(this, LoginActivity.class);
