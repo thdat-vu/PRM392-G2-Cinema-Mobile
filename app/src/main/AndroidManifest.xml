@@ -15,10 +15,13 @@
         android:theme="@style/Theme.PRM392G2MovieBookingMobileApp"
         tools:targetApi="31">
         <activity
+            android:name=".ui.auth.LoginActivity"
+            android:exported="false" />
+        <activity
             android:name=".ui.bookings.BookingHistoryInfoActivity"
             android:exported="false" />
         <activity
-            android:name=".ui.auth.LoginActivity"
+            android:name=".ui.bookings.BookingHistoryListActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
