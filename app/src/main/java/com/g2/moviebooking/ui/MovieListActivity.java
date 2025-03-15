@@ -1,47 +1,63 @@
 package com.g2.moviebooking.ui;
 
-import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.PagerSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.viewpager2.widget.ViewPager2;
-import com.google.android.material.bottomnavigation.BottomNavigationView;
+
 import com.g2.moviebooking.R;
-import com.g2.moviebooking.data.remote.model.Movie;
+import com.g2.moviebooking.data.remote.model.Entity.Movie;
+import com.g2.moviebooking.data.remote.model.Response.MovieResponse;
 import com.g2.moviebooking.data.repository.MovieRepository;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+
 import java.util.ArrayList;
 import java.util.List;
+
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 public class MovieListActivity extends AppCompatActivity implements BottomNavigationView.OnNavigationItemSelectedListener {
+    private static final int PAGE_SIZE = 10;
+
+    // UI components
     private RecyclerView recyclerView;
     private MovieAdapter movieAdapter;
-    private MovieRepository movieRepository;
     private LinearLayoutManager layoutManager;
     private BottomNavigationView bottomNavigationView;
-    private ViewPager2 bannerViewPager;
-    private LinearLayout bannerDotsIndicator;
-    private Handler bannerHandler = new Handler(Looper.getMainLooper());
-    private Runnable bannerRunnable;
-    private final int[] bannerImages = {R.drawable.ic_launcher_background, R.drawable.ic_launcher_background, R.drawable.ic_launcher_background};
+
+    // Data components
+    private MovieRepository movieRepository;
+    private int currentPage = 1;
+    private int totalPages = 1;
+    private boolean isLoading = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_movie_list);
 
+        // Khởi tạo repository
+        movieRepository = new MovieRepository(this);
+
+        // Cấu hình RecyclerView
+        setupRecyclerView();
+
+        // Thiết lập BottomNavigationView
+        setupBottomNavigation();
+
+        // Lấy dữ liệu ban đầu
+        fetchMovies(currentPage);
+    }
+
+    private void setupRecyclerView() {
         recyclerView = findViewById(R.id.recycler_view_movies);
         layoutManager = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
         recyclerView.setLayoutManager(layoutManager);
@@ -56,37 +72,71 @@ public class MovieListActivity extends AppCompatActivity implements BottomNaviga
         PagerSnapHelper snapHelper = new PagerSnapHelper();
         snapHelper.attachToRecyclerView(recyclerView);
 
+        // Thiết lập scroll listener cho paging
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
                 applyScaleEffect();
-            }
 
-            @Override
-            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-                super.onScrollStateChanged(recyclerView, newState);
-                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    applyScaleEffect();
+                int visibleItemCount = layoutManager.getChildCount();
+                int totalItemCount = layoutManager.getItemCount();
+                int firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition();
+
+                if (!isLoading && currentPage < totalPages) {
+                    if ((visibleItemCount + firstVisibleItemPosition) >= totalItemCount - 2) {
+                        currentPage++;
+                        fetchMovies(currentPage);
+                    }
                 }
             }
         });
+    }
 
+    private void setupBottomNavigation() {
         bottomNavigationView = findViewById(R.id.bottom_navigation);
         bottomNavigationView.setOnNavigationItemSelectedListener(this);
         bottomNavigationView.setSelectedItemId(R.id.nav_movies);
-
-        bannerViewPager = findViewById(R.id.banner_view_pager);
-        bannerDotsIndicator = findViewById(R.id.banner_dots_indicator);
-        setupBanner();
-
-        movieRepository = new MovieRepository(this);
-        fetchMovies();
     }
 
+    private void fetchMovies(int pageNum) {
+        isLoading = true;
+
+        movieRepository.getMovies(pageNum, PAGE_SIZE).enqueue(new Callback<MovieResponse>() {
+            @Override
+            public void onResponse(Call<MovieResponse> call, Response<MovieResponse> response) {
+                handleMoviesResponse(response);
+            }
+
+            @Override
+            public void onFailure(Call<MovieResponse> call, Throwable t) {
+                handleNetworkError(t);
+            }
+        });
+    }
+
+    // Xử lý danh sách phim từ API
+    private void handleMoviesResponse(Response<MovieResponse> response) {
+        isLoading = false;
+        if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+            List<Movie> newMovies = response.body().getData().getPageData();
+            totalPages = response.body().getData().getPageInfo().getTotalPages();
+            movieAdapter.addMovies(newMovies);
+            recyclerView.post(this::applyScaleEffect);
+        } else {
+            showToast("Lỗi khi tải danh sách phim: " + response.code());
+        }
+    }
+
+    // Xử lý lỗi mạng
+    private void handleNetworkError(Throwable t) {
+        isLoading = false;
+        showToast("Lỗi mạng: " + t.getMessage());
+    }
+
+    // Áp dụng hiệu ứng scale cho các item
     private void applyScaleEffect() {
         int centerOfScreen = recyclerView.getWidth() / 2;
-
         for (int i = 0; i < recyclerView.getChildCount(); i++) {
             View child = recyclerView.getChildAt(i);
             int childCenter = (child.getLeft() + child.getRight()) / 2;
@@ -99,124 +149,44 @@ public class MovieListActivity extends AppCompatActivity implements BottomNaviga
             float alpha = Math.max(0.7f, 1f - 0.3f * (distanceFromCenter / centerOfScreen));
             child.setAlpha(alpha);
 
-            if (scale > 0.95f) {
-                child.setElevation(10f);
-            } else {
-                child.setElevation(5f);
-            }
+            child.setElevation(scale > 0.95f ? 10f : 5f);
         }
-    }
-
-    private void setupBanner() {
-        BannerAdapter bannerAdapter = new BannerAdapter(bannerImages);
-        bannerViewPager.setAdapter(bannerAdapter);
-
-        setupDotsIndicator(bannerImages.length);
-        bannerViewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
-            @Override
-            public void onPageSelected(int position) {
-                super.onPageSelected(position);
-                updateDotsIndicator(position);
-            }
-        });
-
-        bannerRunnable = new Runnable() {
-            @Override
-            public void run() {
-                int currentItem = bannerViewPager.getCurrentItem();
-                int nextItem = (currentItem + 1) % bannerImages.length;
-                bannerViewPager.setCurrentItem(nextItem, true);
-                bannerHandler.postDelayed(this, 3000);
-            }
-        };
-        bannerHandler.postDelayed(bannerRunnable, 3000);
-    }
-
-    private void setupDotsIndicator(int count) {
-        bannerDotsIndicator.removeAllViews();
-        for (int i = 0; i < count; i++) {
-            ImageView dot = new ImageView(this);
-            dot.setImageResource(i == 0 ? R.drawable.dot_active : R.drawable.dot_inactive);
-            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(20, 20);
-            params.setMargins(12, 0, 12, 0); // Tăng khoảng cách giữa các dots
-            dot.setLayoutParams(params);
-            bannerDotsIndicator.addView(dot);
-        }
-    }
-
-    private void updateDotsIndicator(int position) {
-        for (int i = 0; i < bannerDotsIndicator.getChildCount(); i++) {
-            ImageView dot = (ImageView) bannerDotsIndicator.getChildAt(i);
-            dot.setImageResource(i == position ? R.drawable.dot_active : R.drawable.dot_inactive);
-        }
-    }
-
-    private void fetchMovies() {
-        movieRepository.getMovies(new Callback<List<Movie>>() {
-            @Override
-            public void onResponse(Call<List<Movie>> call, Response<List<Movie>> response) {
-                if (response.isSuccessful() && response.body() != null) {
-                    movieAdapter.updateMovies(response.body());
-                    recyclerView.post(() -> {
-                        if (!response.body().isEmpty()) {
-                            recyclerView.scrollToPosition(0);
-                            applyScaleEffect();
-                        }
-                    });
-                } else {
-                    Toast.makeText(MovieListActivity.this, "Lỗi khi tải danh sách phim: " + response.code(), Toast.LENGTH_SHORT).show();
-                }
-            }
-
-            @Override
-            public void onFailure(Call<List<Movie>> call, Throwable t) {
-                Toast.makeText(MovieListActivity.this, "Lỗi mạng: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if (movieAdapter.getItemCount() > 0) {
-            recyclerView.post(this::applyScaleEffect);
-        }
-        bannerHandler.postDelayed(bannerRunnable, 3000);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        bannerHandler.removeCallbacks(bannerRunnable);
     }
 
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         int itemId = item.getItemId();
-        if (itemId == R.id.nav_movies) {
-            return true;
-        } else if (itemId == R.id.nav_theatres) {
+        if (itemId == R.id.nav_movies) return true;
+        if (itemId == R.id.nav_theatres) {
             navigateToTheatres();
             return true;
-        } else if (itemId == R.id.nav_tickets) {
+        }
+        if (itemId == R.id.nav_tickets) {
             navigateToMyTickets();
             return true;
-        } else if (itemId == R.id.nav_profile) {
+        }
+        if (itemId == R.id.nav_profile) {
             navigateToProfile();
             return true;
         }
         return false;
     }
 
+    // Điều hướng
     private void navigateToTheatres() {
-        Toast.makeText(this, "Chuyển đến màn hình chọn Rạp", Toast.LENGTH_SHORT).show();
+        showToast("Chuyển đến màn hình chọn Rạp");
     }
 
     private void navigateToMyTickets() {
-        Toast.makeText(this, "Chuyển đến màn hình Vé của tôi", Toast.LENGTH_SHORT).show();
+        showToast("Chuyển đến màn hình Vé của tôi");
     }
 
     private void navigateToProfile() {
-        Toast.makeText(this, "Chuyển đến màn hình Tài khoản", Toast.LENGTH_SHORT).show();
+        showToast("Chuyển đến màn hình Tài khoản");
+    }
+
+    // Hiển thị thông báo
+    private void showToast(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 }

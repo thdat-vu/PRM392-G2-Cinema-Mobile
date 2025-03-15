@@ -1,8 +1,11 @@
-package com.g2.moviebooking.data.remote.model;
+package com.g2.moviebooking.data.remote.model.Entity;
 
 import com.google.gson.annotations.SerializedName;
 
 public class Movie {
+    @SerializedName("_id")
+    private String id;
+
     @SerializedName("title")
     private String title;
 
@@ -34,6 +37,7 @@ public class Movie {
     private String trailer;
 
     // Getter methods
+    public String getId() { return id; }
     public String getTitle() { return title; }
     public String getDescription() { return description; }
     public String[] getGenres() { return genres; }
