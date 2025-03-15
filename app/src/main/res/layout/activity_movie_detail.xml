@@ -264,5 +264,16 @@
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
+        <!-- Nút chọn suất chiếu -->
+        <Button
+            android:id="@+id/btn_select_showtime"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Chọn suất chiếu"
+            android:backgroundTint="@android:color/holo_blue_light"
+            android:textColor="@android:color/white"
+            android:padding="12dp" />
+
     </LinearLayout>
 </ScrollView>

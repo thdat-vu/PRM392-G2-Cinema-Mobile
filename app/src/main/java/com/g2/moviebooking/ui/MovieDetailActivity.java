@@ -1,7 +1,9 @@
 package com.g2.moviebooking.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -11,12 +13,15 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.g2.moviebooking.R;
 import com.g2.moviebooking.data.model.Movie;
 import com.g2.moviebooking.data.repository.MovieRepository;
+import com.g2.moviebooking.ui.ShowtimeSelectionActivity;
 import java.util.List;
 
 public class MovieDetailActivity extends AppCompatActivity {
     private ImageView ivBanner;
     private TextView tvTitle, tvDescription, tvGenres, tvReleaseDate, tvDuration, tvDirector, tvActors, tvRating;
+    private Button btnSelectShowtime;
     private MovieRepository movieRepository;
+    private Movie movie;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,12 +50,26 @@ public class MovieDetailActivity extends AppCompatActivity {
         tvDirector = findViewById(R.id.tv_movie_director);
         tvActors = findViewById(R.id.tv_movie_actors);
         tvRating = findViewById(R.id.tv_movie_rating);
+        btnSelectShowtime = findViewById(R.id.btn_select_showtime);
+
+        // Handle button click to go to ShowtimeSelectionActivity
+        btnSelectShowtime.setOnClickListener(v -> {
+            if (movie != null) {
+                Intent intent = new Intent(MovieDetailActivity.this, ShowtimeSelectionActivity.class);
+                intent.putExtra("MOVIE_ID", movie.getId());
+                intent.putExtra("MOVIE_TITLE", movie.getTitle());
+                startActivity(intent);
+            } else {
+                showToast("Vui lòng chờ thông tin phim được tải");
+            }
+        });
     }
 
     private void fetchMovieDetail(String movieId) {
         movieRepository.getMovieDetail(movieId, new MovieRepository.MovieCallback<Movie>() {
             @Override
-            public void onSuccess(Movie movie) {
+            public void onSuccess(Movie movieResult) {
+                movie = movieResult; // Store the movie for later use
                 displayMovieDetail(movie);
             }
 
