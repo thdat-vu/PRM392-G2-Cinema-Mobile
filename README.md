@@ -1,112 +1,70 @@
-# Ứng Dụng Đặt Vé Xem Phim
+# Movie Booking App
 
-Ứng dụng Android cho phép người dùng duyệt phim, xem chi tiết và đặt vé với giao diện mượt mà và thông tin phim đầy đủ.
+Ứng dụng Android đơn giản cho phép người dùng xem danh sách phim, chi tiết phim và đăng nhập bằng Google để truy cập. Ứng dụng sử dụng Firebase để quản lý dữ liệu và xác thực.
 
-## Tính Năng
+## Tính năng chính
+- **Đăng nhập bằng Google**: Xác thực người dùng qua Firebase Authentication.
+- **Danh sách phim**: Hiển thị danh sách phim từ Firestore trong RecyclerView dạng ngang với phân trang.
+- **Chi tiết phim**: Xem thông tin chi tiết của phim bằng cách nhấn đúp vào mục trong danh sách.
 
-- **Xác Thực Người Dùng**: Đăng nhập (Email/Mật khẩu, Google), Đăng ký, Xác thực bằng JWT.  
-- **Duyệt Phim**: Danh sách phim cuộn ngang với hiệu ứng thu phóng và phân trang.  
-- **Chi Tiết Phim**: Thông tin phim (tiêu đề, mô tả, thời lượng, ngày phát hành, đạo diễn, diễn viên, thể loại, đánh giá) kèm ảnh banner.  
-- **Điều Hướng**: Thanh điều hướng dưới cùng, giao diện trực quan.
+## Công nghệ
+- **Ngôn ngữ**: Java
+- **Framework**: Android SDK
+- **Database**: Firebase Firestore
+- **Authentication**: Firebase Authentication (Google Sign-In)
+- **Hình ảnh**: Glide (tải và hiển thị banner phim)
 
-## Cấu Trúc Dự Án
-
-```
-App
-├── UI Layer
-│   ├── Authentication
-│   │   ├── LoginActivity → AuthRepository → RetrofitClient
-│   │   └── RegistrationActivity → AuthRepository → RetrofitClient
-│   └── Movie Browsing
-│       ├── MovieListActivity → MovieRepository → RetrofitClient
-│       ├── MovieAdapter
-│       └── MovieDetailActivity → MovieRepository → RetrofitClient
-├── Data Layer
-│   ├── Remote
-│   │   ├── ApiService → RetrofitClient
-│   │   ├── Entity Models
-│   │   ├── Request Models
-│   │   └── Response Models
-│   └── Repository
-│       ├── AuthRepository → RetrofitClient
-│       └── MovieRepository → RetrofitClient
-└── Utils
-    └── RetrofitClient
-```
-
-## Kiến Trúc
-
-Sử dụng mô hình Repository đơn giản hóa:  
-- **UI Layer**: Hiển thị giao diện và xử lý tương tác.  
-- **Repository Layer**: Kết nối dữ liệu và UI.  
-- **Remote Layer**: Giao tiếp API qua Retrofit.
-
-## Thư Viện
-
-- Retrofit (Yêu cầu HTTP)  
-- Gson (Xử lý JSON)  
-- Glide (Tải ảnh)  
-- Firebase Authentication (Đăng nhập Google)  
-- RecyclerView (Hiển thị danh sách)  
-- Material Design Components (Giao diện)
-
-## Cài Đặt
-
-### Yêu Cầu
-- Android Studio Arctic Fox (2020.3.1) trở lên  
-- JDK 11+  
-- Target SDK: 30+  
-- Minimum SDK: 21 (Android 5.0)
-
-### Cấu Hình Firebase
-1. Tạo dự án tại [Firebase Console](https://console.firebase.google.com/).  
-2. Thêm ứng dụng Android, tải `google-services.json` vào thư mục `app`.  
-3. Bật Google Sign-In trong Firebase Authentication.
-
-### Cấu Hình API
-- Sử dụng API tại `https://prm-392-g2-cinema.vercel.app/`.  
-- Đảm bảo API hoạt động.
-
-### Hướng Dẫn
+## Cài đặt
 1. Clone repository:
-   ```bash
-   git clone https://github.com/<tên-người-dùng>/movie-booking-app.git
    ```
-2. Mở bằng Android Studio.  
-3. Đồng bộ thư viện.  
-4. Build và chạy.
+   git clone <repository_url>
+   ```
+2. Thêm file `google-services.json` vào thư mục `app/` (tải từ Firebase Console).
+3. Sync project với Gradle:
+   ```
+   ./gradlew build
+   ```
+4. Chạy ứng dụng trên emulator hoặc thiết bị thật.
 
-## API Endpoints
+## Cấu trúc thư mục
+```
+com.g2.moviebooking
+├── data
+│   ├── model
+│   │   ├── Movie.java       # Model phim với các thuộc tính như tiêu đề, mô tả, thể loại...
+│   │   └── User.java        # Model người dùng với tên và email
+│   └── repository
+│       ├── AuthRepository.java  # Xử lý đăng nhập Google và lưu user vào Firestore
+│       └── MovieRepository.java # Truy vấn danh sách phim và chi tiết phim
+├── ui
+│   ├── auth
+│   │   └── LoginActivity.java   # Màn hình đăng nhập Google
+│   ├── MovieAdapter.java        # Adapter cho RecyclerView hiển thị danh sách phim
+│   ├── MovieDetailActivity.java # Hiển thị chi tiết phim
+│   └── MovieListActivity.java   # Danh sách phim với phân trang
+└── utils
+    └── FirebaseClient.java       # Singleton khởi tạo FirebaseAuth và Firestore
+```
 
-### Xác Thực
-- `POST /auth/google`: Xác thực token Google  
-- `POST /api/auth/login`: Đăng nhập bằng email/mật khẩu  
-- `POST /api/users`: Đăng ký người dùng  
+## Cách hoạt động
+1. **LoginActivity**: 
+   - Sử dụng Google Sign-In để xác thực.
+   - Lưu thông tin người dùng (tên, email) vào Firestore sau khi đăng nhập thành công.
+2. **MovieListActivity**: 
+   - Tải danh sách phim từ Firestore với phân trang (10 phim/trang).
+   - Sử dụng RecyclerView ngang với PagerSnapHelper để hiển thị.
+   - Tự động tải thêm phim khi người dùng cuộn gần cuối danh sách.
+3. **MovieDetailActivity**: 
+   - Hiển thị chi tiết phim (tiêu đề, mô tả, thể loại, đạo diễn, diễn viên...) khi nhấn đúp vào phim.
+   - Sử dụng Glide để tải banner phim.
 
-### Phim
-- `GET /api/movies`: Danh sách phim (phân trang)  
-- `GET /api/movies/{id}`: Chi tiết phim  
+## TODO
+- [ ] Thêm tính năng đặt vé (chọn rạp, giờ chiếu, ghế ngồi).
+- [ ] Tích hợp cổng thanh toán (ví dụ: Stripe, PayPal).
+- [ ] Thêm bộ lọc phim theo thể loại, đánh giá hoặc ngày phát hành.
+- [ ] Cải thiện giao diện (thêm animation khi chuyển màn hình, hỗ trợ dark mode).
+- [ ] Thêm xử lý lỗi mạng và lưu trữ offline bằng Room hoặc SharedPreferences.
 
-## Công Việc Cần Làm
-- [x] Màn hình đăng nhập/đăng ký  
-- [x] Đăng nhập Google  
-- [x] Danh sách phim với phân trang  
-- [x] Hiệu ứng UI  
-- [x] Chi tiết phim  
-- [ ] Chọn rạp chiếu  
-- [ ] Chọn lịch chiếu  
-- [ ] Chọn ghế  
-- [ ] Thanh toán vé  
-- [ ] Quản lý vé  
-
-## Đóng Góp
-
-1. Fork repository.  
-2. Tạo nhánh: `git checkout -b feature/tính-năng-mới`.  
-3. Commit: `git commit -m 'Thêm tính năng mới'`.  
-4. Push: `git push origin feature/tính-năng-mới`.  
-5. Tạo Pull Request.
-
-## Giấy Phép
-
-MIT License - xem [LICENSE](LICENSE) để biết thêm.
+## Góp ý
+- Hiện tại ứng dụng chỉ hỗ trợ xem danh sách và chi tiết phim. Để biến nó thành ứng dụng đặt vé hoàn chỉnh, cần thêm logic đặt vé và giao diện tương ứng.
+- Có thể tích hợp API bên thứ ba như The Movie Database (TMDb) để làm phong phú dữ liệu phim.

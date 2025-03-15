@@ -1,28 +1,63 @@
 package com.g2.moviebooking.data.repository;
 
 import android.content.Context;
-
-import com.g2.moviebooking.data.remote.api.ApiService;
-import com.g2.moviebooking.data.remote.model.Response.MovieDetailResponse;
-import com.g2.moviebooking.data.remote.model.Response.MovieResponse;
-import com.g2.moviebooking.utils.RetrofitClient;
-
-import retrofit2.Call;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.g2.moviebooking.data.model.Movie;
+import com.g2.moviebooking.utils.FirebaseClient;
+import java.util.List;
 
 public class MovieRepository {
-    private final ApiService apiService;
+    private final FirebaseFirestore db;
+    private static final int PAGE_SIZE = 10;
 
     public MovieRepository(Context context) {
-        apiService = RetrofitClient.getInstance(context).create(ApiService.class);
+        db = FirebaseClient.getFirestore();
+    }
+
+    // Gán ID cho Movie
+    private void setMovieId(Movie movie, String id) {
+        if (movie != null) {
+            movie.setId(id);
+        }
     }
 
     // Lấy danh sách phim với phân trang
-    public Call<MovieResponse> getMovies(int pageNum, int pageSize) {
-        return apiService.getMovies(pageNum, pageSize);
+    public void getMovies(int pageNum, MovieCallback<List<Movie>> callback) {
+        Query query = db.collection("movies")
+                .orderBy("title")
+                .limit(PAGE_SIZE);
+
+        if (pageNum > 1) {
+            query = query.startAfter((pageNum - 1) * PAGE_SIZE);
+        }
+
+        query.get()
+                .addOnSuccessListener(querySnapshot -> {
+                    List<Movie> movies = querySnapshot.toObjects(Movie.class);
+                    for (int i = 0; i < movies.size(); i++) {
+                        setMovieId(movies.get(i), querySnapshot.getDocuments().get(i).getId());
+                    }
+                    callback.onSuccess(movies);
+                })
+                .addOnFailureListener(e -> callback.onFailure(e.getMessage()));
     }
 
-    // Lấy thông tin chi tiết của một phim
-    public Call<MovieDetailResponse> getMovieDetail(String movieId) {
-        return apiService.getMovieDetail(movieId);
+    // Lấy chi tiết phim
+    public void getMovieDetail(String movieId, MovieCallback<Movie> callback) {
+        db.collection("movies").document(movieId)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    Movie movie = documentSnapshot.toObject(Movie.class);
+                    setMovieId(movie, documentSnapshot.getId());
+                    callback.onSuccess(movie);
+                })
+                .addOnFailureListener(e -> callback.onFailure(e.getMessage()));
+    }
+
+    // Interface callback
+    public interface MovieCallback<T> {
+        void onSuccess(T result);
+        void onFailure(String error);
     }
 }

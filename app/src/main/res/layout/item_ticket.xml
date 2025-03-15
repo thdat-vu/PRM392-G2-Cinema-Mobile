@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:id="@+id/ticket_movie_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Movie Title"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/ticket_theatre_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Theatre Name"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/ticket_showtime"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Showtime"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/ticket_seats"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Seats"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/ticket_booking_code"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Booking Code"
+            android:textSize="14sp" />
+    </LinearLayout>
+</androidx.cardview.widget.CardView>
