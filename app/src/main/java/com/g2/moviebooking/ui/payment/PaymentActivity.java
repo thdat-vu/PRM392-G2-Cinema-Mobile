@@ -30,10 +30,10 @@ public class PaymentActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_payment);
+        setContentView(R.layout.activity_payment_details);
 
         tvAmount = findViewById(R.id.tvAmount);
-        tvTotal = findViewById(R.id.tvTotal);
+        // tvTotal = findViewById(R.id.tvTotal);
         btnCheckout = findViewById(R.id.btnCheckout);
 
         StrictMode.ThreadPolicy policy = new
@@ -43,14 +43,14 @@ public class PaymentActivity extends AppCompatActivity {
         // ZaloPay SDK Init
         ZaloPaySDK.init(2553, Environment.SANDBOX);
 
-        Intent intent = getIntent();
-        tvAmount.setText(intent.getStringExtra("soluong"));
-        Double total = intent.getDoubleExtra("total", 0);
+         Intent intent = getIntent();
+         tvAmount.setText(intent.getStringExtra("soluong"));
+         Double total = intent.getDoubleExtra("total", 0);
 
         NumberFormat formatter = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
         String totalString = String.format("%.0f", total);
         String totalFormatted = formatter.format(total);
-        tvTotal.setText(totalFormatted);
+        tvAmount.setText(totalFormatted);
 
         btnCheckout.setOnClickListener(v -> {
             CreateOrder orderApi = new CreateOrder();

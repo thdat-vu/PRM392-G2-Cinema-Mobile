@@ -15,11 +15,21 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.PRM392G2MovieBookingMobileApp"
         tools:targetApi="31">
-<!--        <activity-->
-<!--            android:name=".ui.payment.PaymentNotificationActivity"-->
-<!--            android:exported="false" />-->
         <activity
-            android:name=".ui.payment.PaymentNotificationActivity"
+            android:name=".ui.payment.PaymentActivity"
+            android:exported="true"
+            android:launchMode="singleTask">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:host="app"
+                    android:scheme="demozpdk" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".ui.auth.LoginActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -30,6 +40,8 @@
         <activity android:name=".ui.MovieListActivity" />
         <activity android:name=".ui.auth.RegistrationActivity" />
         <activity android:name=".ui.MovieDetailActivity" />
+<!--        <activity android:name=".ui.payment.PaymentActivity" />-->
+        <activity android:name=".ui.payment.PaymentNotificationActivity" android:exported="true"/>
     </application>
 
 </manifest>
