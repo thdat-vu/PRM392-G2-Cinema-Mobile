@@ -15,6 +15,10 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.g2.moviebooking.R;
+import com.g2.moviebooking.data.remote.model.Entity.Booking;
+import com.g2.moviebooking.data.remote.model.Entity.Movie;
+import com.g2.moviebooking.data.remote.model.Entity.Showtime;
+import com.g2.moviebooking.data.remote.model.Entity.Theatre;
 import com.g2.moviebooking.utils.QRCodeGenerator;
 
 public class BookingHistoryInfoActivity extends AppCompatActivity {
