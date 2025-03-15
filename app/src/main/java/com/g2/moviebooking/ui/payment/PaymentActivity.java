@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.g2.moviebooking.R;
 import com.g2.moviebooking.ui.payment.Api.CreateOrder;
+import com.g2.moviebooking.ui.payment.Constant.AppInfo;
 
 import org.json.JSONObject;
 
@@ -24,7 +25,7 @@ import vn.zalopay.sdk.ZaloPaySDK;
 import vn.zalopay.sdk.listeners.PayOrderListener;
 
 public class PaymentActivity extends AppCompatActivity {
-    TextView tvAmount, tvTotal;
+    TextView tvAmount;
     Button btnCheckout;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,11 +42,10 @@ public class PaymentActivity extends AppCompatActivity {
         StrictMode.setThreadPolicy(policy);
 
         // ZaloPay SDK Init
-        ZaloPaySDK.init(2553, Environment.SANDBOX);
+        ZaloPaySDK.init(AppInfo.APP_ID, Environment.SANDBOX);
 
-         Intent intent = getIntent();
-         tvAmount.setText(intent.getStringExtra("soluong"));
-         Double total = intent.getDoubleExtra("total", 0);
+        Intent intent = getIntent();
+        Double total = intent.getDoubleExtra("total", 0);
 
         NumberFormat formatter = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
         String totalString = String.format("%.0f", total);

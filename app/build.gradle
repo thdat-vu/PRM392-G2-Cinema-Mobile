@@ -30,8 +30,12 @@ android {
     }
 }
 
-dependencies {
+// Add this at the top of the dependencies block
+def localProperties = new Properties()
+localProperties.load(new FileInputStream(rootProject.file("local.properties")))
+def zaloPayLibDir = localProperties.getProperty('zalopay.lib.dir', '')
 
+dependencies {
     implementation libs.appcompat
     implementation libs.material
     implementation libs.activity
@@ -39,7 +43,7 @@ dependencies {
 
     // Zalo Pay
     implementation fileTree(
-            dir: 'D:\\Bi\\FPT\\Sem8\\PRM392\\Final_Project\\ZaloPayLib',
+            dir: zaloPayLibDir,
             include: ['*.aar', '*.jar'],
             exclude: [''])
     implementation("com.squareup.okhttp3:okhttp:4.6.0")
