@@ -24,7 +24,6 @@ public class RetrofitClient {
     private static final String BASE_URL = "https://prm-392-g2-cinema.vercel.app/";
     private static final String PREFS_NAME = "MyPrefs";
     private static final String TOKEN_KEY = "jwt_token";
-
     private static volatile Retrofit retrofit;
     private static volatile OkHttpClient okHttpClient;
     private static Context appContext;

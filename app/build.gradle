@@ -35,6 +35,14 @@ dependencies {
     implementation libs.material
     implementation libs.activity
     implementation libs.constraintlayout
+    // Zalo Pay
+    implementation fileTree(
+            dir: 'D:\\Bi\\FPT\\Sem8\\PRM392\\Final_Project\\ZaloPayLib',
+            include: ['*.aar', '*.jar'],
+            exclude: [''])
+    implementation("com.squareup.okhttp3:okhttp:4.6.0")
+    implementation("commons-codec:commons-codec:1.14")
+
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core
