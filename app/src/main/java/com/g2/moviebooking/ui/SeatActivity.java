@@ -24,10 +24,8 @@ public class SeatActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_seats_booking);
 
-        // Initialize RecyclerView
         seatRecyclerView = findViewById(R.id.seatRecyclerView);
 
-        // Generate fake data (64 seats for an 8x8 grid)
         seatStatusList = new ArrayList<>();
         for (int i = 0; i < 64; i++) {
             if (i % 5 == 0) {
@@ -40,7 +38,7 @@ public class SeatActivity extends AppCompatActivity {
         }
 
         seatAdapter = new SeatAdapter(seatStatusList);
-        seatRecyclerView.setLayoutManager(new GridLayoutManager(this, 8)); // 8 columns
+        seatRecyclerView.setLayoutManager(new GridLayoutManager(this, 8));
         seatRecyclerView.setAdapter(seatAdapter);
     }
 

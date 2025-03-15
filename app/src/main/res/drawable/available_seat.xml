@@ -2,8 +2,8 @@
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle">
 
-    <!-- Background Color (light purple) -->
-    <solid android:color="#D2C7F2"/> <!-- Adjust this color to match your image -->
+    <!-- Background Color (light pink) -->
+    <solid android:color="#FDA0C9"/> <!-- Adjust this color to match your image -->
 
     <!-- Rounded Corners -->
     <corners android:radius="12dp"/> <!-- Adjust the radius to get softer or sharper corners -->

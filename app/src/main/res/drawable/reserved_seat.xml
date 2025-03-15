@@ -3,7 +3,8 @@
     android:shape="rectangle">
 
     <!-- Background Color (light purple) -->
-    <solid android:color="@color/colorPrimaryDark"/> <!-- Adjust this color to match your image -->
+    <!-- D2C7F2-->
+    <solid android:color="#D2C7F2"/> <!-- Adjust this color to match your image -->
 
     <!-- Rounded Corners -->
     <corners android:radius="12dp"/> <!-- Adjust the radius to get softer or sharper corners -->
