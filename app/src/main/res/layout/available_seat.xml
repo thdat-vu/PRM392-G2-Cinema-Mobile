@@ -1,7 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+android:id="@+id/seat_container"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:layout_margin="4dp"
+>
+
+<!-- Seat Image -->
 <ImageView
-    xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/seat_image"
-    android:layout_width="40dp"
-    android:layout_height="40dp"
-    android:layout_margin="4dp"
-    android:contentDescription="Seat" />
+    android:layout_width="36dp"
+    android:layout_height="36dp"
+    android:src="@drawable/available_seat"
+    android:contentDescription="Seat Image" />
+
+<!-- Seat Label (e.g., A1, A2, etc.) -->
+<TextView
+    android:id="@+id/seat_label"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center"
+    android:gravity="center"
+    android:text="A1"
+    android:textSize="14sp"
+    android:textStyle="bold"
+    android:textColor="@android:color/white" />
+
+</FrameLayout>
