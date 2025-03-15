@@ -2,6 +2,7 @@ package com.g2.moviebooking.ui.auth;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -15,10 +16,13 @@ import com.g2.moviebooking.ui.MovieListActivity;
 import com.g2.moviebooking.utils.RetrofitClient;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GoogleAuthProvider;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -36,23 +40,18 @@ public class LoginActivity extends AppCompatActivity {
 
     // Authentication components
     private AuthRepository authRepository;
-    private GoogleSignInClient googleSignInClient;
+    private FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        // Khởi tạo repository
+        // Khởi tạo Firebase Auth
+        mAuth = FirebaseAuth.getInstance();
         authRepository = new AuthRepository(this);
 
-        // Khởi tạo UI
         setupViews();
-
-        // Cấu hình Google Sign-In
-        setupGoogleSignIn();
-
-        // Gán sự kiện cho các button
         setupListeners();
     }
 
@@ -62,14 +61,6 @@ public class LoginActivity extends AppCompatActivity {
         btnLogin = findViewById(R.id.btn_login);
         btnRegister = findViewById(R.id.btn_register);
         btnGoogleSignIn = findViewById(R.id.btn_google_sign_in);
-    }
-
-    private void setupGoogleSignIn() {
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.default_web_client_id))
-                .requestEmail()
-                .build();
-        googleSignInClient = GoogleSignIn.getClient(this, gso);
     }
 
     private void setupListeners() {
@@ -101,7 +92,10 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void signInWithGoogle() {
-        Intent signInIntent = googleSignInClient.getSignInIntent();
+        Intent signInIntent = GoogleSignIn.getClient(this, new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestEmail()
+                .build()).getSignInIntent();
         startActivityForResult(signInIntent, RC_SIGN_IN);
     }
 
@@ -112,12 +106,34 @@ public class LoginActivity extends AppCompatActivity {
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
             try {
                 GoogleSignInAccount account = task.getResult(ApiException.class);
-                String idToken = account.getIdToken();
-                sendTokenToBackend(idToken);
+                firebaseAuthWithGoogle(account.getIdToken());
             } catch (ApiException e) {
                 showToast("Đăng nhập Google thất bại: " + e.getMessage());
+                Log.e("GoogleSignIn", "Sign in failed: " + e.getMessage());
             }
         }
+    }
+
+    private void firebaseAuthWithGoogle(String idToken) {
+        AuthCredential credential = GoogleAuthProvider.getCredential(idToken, null);
+        mAuth.signInWithCredential(credential)
+                .addOnCompleteListener(this, task -> {
+                    if (task.isSuccessful()) {
+                        FirebaseUser user = mAuth.getCurrentUser();
+                        user.getIdToken(true).addOnCompleteListener(tokenTask -> {
+                            if (tokenTask.isSuccessful()) {
+                                String firebaseIdToken = tokenTask.getResult().getToken();
+                                Log.d("FirebaseAuth", "ID Token: " + firebaseIdToken);
+                                showToast("Đã lấy token, kiểm tra logcat");
+                                sendTokenToBackend(firebaseIdToken); // Gửi token này đến BE
+                            } else {
+                                showToast("Lấy token thất bại");
+                            }
+                        });
+                    } else {
+                        showToast("Xác thực Firebase thất bại");
+                    }
+                });
     }
 
     private void sendTokenToBackend(String idToken) {
@@ -134,7 +150,6 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    // Xử lý phản hồi đăng nhập
     private void handleLoginResponse(Response<LoginResponse> response) {
         if (response.isSuccessful() && response.body() != null) {
             String jwtToken = response.body().getJwtToken();
@@ -146,29 +161,17 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
-    // Xử lý lỗi mạng
     private void handleNetworkError(Throwable t) {
         showToast("Lỗi mạng: " + t.getMessage());
     }
 
-    // Điều hướng đến MovieListActivity
     private void navigateToMovieList() {
         Intent intent = new Intent(this, MovieListActivity.class);
         startActivity(intent);
         finish();
     }
 
-    // Hiển thị thông báo
     private void showToast(String message) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
-    }
-
-    // Phương thức logout (nếu cần)
-    public void logout() {
-        RetrofitClient.clearToken(this);
-        Intent intent = new Intent(this, LoginActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
-        finish();
     }
 }

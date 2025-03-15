@@ -1,6 +1,9 @@
 package com.g2.moviebooking.ui;
 
+import android.content.Intent;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -41,6 +44,23 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
         holder.titleTextView.setText(movie.getTitle());
         holder.ratingTextView.setText(String.format("%.1f", movie.getRating()));
         holder.genresTextView.setText(String.join(", ", movie.getGenres() != null ? movie.getGenres() : new String[]{}));
+
+        // Thêm sự kiện double-click
+        GestureDetector gestureDetector = new GestureDetector(holder.itemView.getContext(),
+                new GestureDetector.SimpleOnGestureListener() {
+                    @Override
+                    public boolean onDoubleTap(MotionEvent e) {
+                        Intent intent = new Intent(holder.itemView.getContext(), MovieDetailActivity.class);
+                        intent.putExtra("MOVIE_ID", movie.getId()); // Giả định Movie có getId()
+                        holder.itemView.getContext().startActivity(intent);
+                        return true;
+                    }
+                });
+
+        holder.itemView.setOnTouchListener((v, event) -> {
+            gestureDetector.onTouchEvent(event);
+            return true;
+        });
     }
 
     @Override
