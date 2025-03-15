@@ -1,6 +1,7 @@
 package com.g2.moviebooking.ui;
 
 import android.content.Intent;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -8,13 +9,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.g2.moviebooking.R;
-import com.g2.moviebooking.data.remote.model.Entity.Movie;
-
+import com.g2.moviebooking.data.model.Movie;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,24 +33,24 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
     @Override
     public void onBindViewHolder(MovieViewHolder holder, int position) {
         Movie movie = movies.get(position);
-        // Tải banner bằng Glide
+        Log.d("MovieAdapter", "Banner URL: " + movie.getBannerUrl());
         Glide.with(holder.itemView.getContext())
-                .load(movie.getBanner())
+                .load(movie.getBannerUrl())
                 .placeholder(R.drawable.ic_launcher_background)
                 .error(R.drawable.ic_launcher_background)
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .into(holder.imageViewBanner);
 
         holder.titleTextView.setText(movie.getTitle());
         holder.ratingTextView.setText(String.format("%.1f", movie.getRating()));
-        holder.genresTextView.setText(String.join(", ", movie.getGenres() != null ? movie.getGenres() : new String[]{}));
+        holder.genresTextView.setText(String.join(", ", movie.getGenres() != null ? movie.getGenres() : new ArrayList<>()));
 
-        // Thêm sự kiện double-click
         GestureDetector gestureDetector = new GestureDetector(holder.itemView.getContext(),
                 new GestureDetector.SimpleOnGestureListener() {
                     @Override
                     public boolean onDoubleTap(MotionEvent e) {
                         Intent intent = new Intent(holder.itemView.getContext(), MovieDetailActivity.class);
-                        intent.putExtra("MOVIE_ID", movie.getId()); // Giả định Movie có getId()
+                        intent.putExtra("MOVIE_ID", movie.getId());
                         holder.itemView.getContext().startActivity(intent);
                         return true;
                     }
@@ -68,14 +67,12 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
         return movies.size();
     }
 
-    // Thêm danh sách phim mới
     public void addMovies(List<Movie> newMovies) {
         int startPosition = movies.size();
         movies.addAll(newMovies);
         notifyItemRangeInserted(startPosition, newMovies.size());
     }
 
-    // Cập nhật toàn bộ danh sách phim
     public void updateMovies(List<Movie> newMovies) {
         movies.clear();
         movies.addAll(newMovies);

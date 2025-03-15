@@ -1,44 +1,53 @@
 package com.g2.moviebooking.data.repository;
 
 import android.content.Context;
-
-import com.g2.moviebooking.data.remote.api.ApiService;
-import com.g2.moviebooking.data.remote.model.Request.GoogleTokenRequest;
-import com.g2.moviebooking.data.remote.model.Request.LoginRequest;
-import com.g2.moviebooking.data.remote.model.Request.RegistrationRequest;
-import com.g2.moviebooking.data.remote.model.Response.LoginResponse;
-import com.g2.moviebooking.data.remote.model.Response.RegistrationResponse;
-import com.g2.moviebooking.utils.RetrofitClient;
-
-import retrofit2.Call;
-import retrofit2.Callback;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.g2.moviebooking.data.model.User;
+import com.g2.moviebooking.utils.FirebaseClient;
 
 public class AuthRepository {
-    private final ApiService apiService;
+    private final FirebaseAuth auth;
+    private final FirebaseFirestore db;
 
     public AuthRepository(Context context) {
-        apiService = RetrofitClient.getInstance(context).create(ApiService.class);
+        auth = FirebaseClient.getAuth();
+        db = FirebaseClient.getFirestore();
     }
 
     // Đăng nhập bằng Google
-    public void loginWithGoogle(String idToken, Callback<LoginResponse> callback) {
-        GoogleTokenRequest request = new GoogleTokenRequest(idToken);
-        Call<LoginResponse> call = apiService.loginWithGoogle(request);
-        call.enqueue(callback);
+    public void loginWithGoogle(String idToken, AuthCallback callback) {
+        AuthCredential credential = GoogleAuthProvider.getCredential(idToken, null);
+        auth.signInWithCredential(credential)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        FirebaseUser user = auth.getCurrentUser();
+                        if (user != null) {
+                            User newUser = new User(user.getDisplayName(), user.getEmail());
+                            db.collection("users").document(user.getUid())
+                                    .set(newUser)
+                                    .addOnCompleteListener(setTask -> {
+                                        if (setTask.isSuccessful()) {
+                                            callback.onSuccess(user);
+                                        } else {
+                                            callback.onFailure("Lưu người dùng thất bại: " + setTask.getException().getMessage());
+                                        }
+                                    });
+                        } else {
+                            callback.onFailure("Không thể lấy thông tin người dùng");
+                        }
+                    } else {
+                        callback.onFailure("Đăng nhập thất bại: " + task.getException().getMessage());
+                    }
+                });
     }
 
-    // Đăng nhập bằng email và password
-    public void login(String email, String password, Callback<LoginResponse> callback) {
-        LoginRequest request = new LoginRequest(email, password);
-        Call<LoginResponse> call = apiService.login(request);
-        call.enqueue(callback);
-    }
-
-    // Đăng ký người dùng mới
-    public void register(String name, String email, String password, String phoneNumber,
-                         Callback<RegistrationResponse> callback) {
-        RegistrationRequest request = new RegistrationRequest(name, email, password, phoneNumber);
-        Call<RegistrationResponse> call = apiService.register(request);
-        call.enqueue(callback);
+    // Interface callback để xử lý kết quả
+    public interface AuthCallback {
+        void onSuccess(FirebaseUser user);
+        void onFailure(String error);
     }
 }
