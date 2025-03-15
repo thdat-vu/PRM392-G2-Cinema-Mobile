@@ -64,4 +64,7 @@ dependencies {
     
     // ZXing for QR code generation
     implementation 'com.google.zxing:core:3.4.1'
+
+    // CardView để tạo giao diện thẻ
+    implementation 'androidx.cardview:cardview:1.0.0'
 }

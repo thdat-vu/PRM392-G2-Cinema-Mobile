@@ -28,6 +28,8 @@
         </activity>
         <activity android:name=".ui.MovieListActivity" />
         <activity android:name=".ui.MovieDetailActivity" />
+        <activity android:name=".ui.tickets.TicketsActivity" />
+        <activity android:name=".ui.tickets.TicketDetailActivity" />
     </application>
 
 </manifest>
