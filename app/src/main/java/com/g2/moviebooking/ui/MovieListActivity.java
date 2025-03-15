@@ -1,5 +1,6 @@
 package com.g2.moviebooking.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
@@ -9,6 +10,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.g2.moviebooking.R;
 import com.g2.moviebooking.data.model.Movie;
 import com.g2.moviebooking.data.repository.MovieRepository;
+import com.g2.moviebooking.ui.tickets.TicketsActivity;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,6 +33,7 @@ public class MovieListActivity extends AppCompatActivity {
 
         movieRepository = new MovieRepository(this);
         setupRecyclerView();
+        setupBottomNavigation();
         fetchMovies(currentPage);
     }
 
@@ -62,6 +66,31 @@ public class MovieListActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    private void setupBottomNavigation() {
+        BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
+        bottomNavigationView.setOnItemSelectedListener(item -> {
+            int itemId = item.getItemId();
+
+            if (itemId == R.id.nav_movies) {
+                return true;
+            } else if (itemId == R.id.nav_theatres) {
+                // TODO: Implement TheatresActivity
+                showToast("Chức năng rạp chưa được triển khai");
+                return true;
+            } else if (itemId == R.id.nav_tickets) {
+                startActivity(new Intent(this, TicketsActivity.class));
+                return true;
+            } else if (itemId == R.id.nav_profile) {
+                // TODO: Implement ProfileActivity
+                showToast("Chức năng tài khoản chưa được triển khai");
+                return true;
+            }
+
+            return false;
+        });
+        bottomNavigationView.setSelectedItemId(R.id.nav_movies); // Default selection
     }
 
     private void fetchMovies(int pageNum) {

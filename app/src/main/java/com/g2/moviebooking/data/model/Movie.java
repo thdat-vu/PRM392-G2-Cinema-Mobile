@@ -1,9 +1,11 @@
 package com.g2.moviebooking.data.model;
 
 import com.google.firebase.firestore.Exclude;
+
+import java.io.Serializable;
 import java.util.List;
 
-public class Movie {
+public class Movie implements Serializable {
     @Exclude
     private String id; // ID của document trong Firestore
     private String title;
