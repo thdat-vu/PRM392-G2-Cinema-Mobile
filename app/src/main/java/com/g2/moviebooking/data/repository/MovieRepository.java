@@ -55,6 +55,39 @@ public class MovieRepository {
                 .addOnFailureListener(e -> callback.onFailure(e.getMessage()));
     }
 
+    // Tìm phim theo thể loại
+    public void getMoviesByGenre(String genre, MovieCallback<List<Movie>> callback) {
+        db.collection("movies")
+                .whereArrayContains("genres", genre)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    List<Movie> movies = querySnapshot.toObjects(Movie.class);
+                    for (int i = 0; i < movies.size(); i++) {
+                        setMovieId(movies.get(i), querySnapshot.getDocuments().get(i).getId());
+                    }
+                    callback.onSuccess(movies);
+                })
+                .addOnFailureListener(e -> callback.onFailure(e.getMessage()));
+    }
+
+    // Tìm kiếm phim theo tên
+    public void searchMoviesByTitle(String keyword, MovieCallback<List<Movie>> callback) {
+        db.collection("movies")
+                .orderBy("title")
+                .startAt(keyword)
+                .endAt(keyword + "\uf8ff") // unicode trick
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    List<Movie> movies = querySnapshot.toObjects(Movie.class);
+                    for (int i = 0; i < movies.size(); i++) {
+                        setMovieId(movies.get(i), querySnapshot.getDocuments().get(i).getId());
+                    }
+                    callback.onSuccess(movies);
+                })
+                .addOnFailureListener(e -> callback.onFailure(e.getMessage()));
+    }
+
+
     // Interface callback
     public interface MovieCallback<T> {
         void onSuccess(T result);

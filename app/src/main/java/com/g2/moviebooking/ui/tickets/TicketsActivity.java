@@ -2,37 +2,56 @@ package com.g2.moviebooking.ui.tickets;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.g2.moviebooking.R;
 import com.g2.moviebooking.data.model.Booking;
+import com.g2.moviebooking.data.model.Movie;
+import com.g2.moviebooking.data.model.Showtime;
+import com.g2.moviebooking.data.model.Theatre;
+import com.g2.moviebooking.data.repository.BookingRepository;
+import com.g2.moviebooking.data.repository.MovieRepository;
+import com.g2.moviebooking.data.repository.ShowtimeRepository;
+import com.g2.moviebooking.data.repository.TheatreRepository;
 import com.g2.moviebooking.ui.MovieListActivity;
-import com.g2.moviebooking.utils.FirebaseClient;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.auth.FirebaseUser;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class TicketsActivity extends AppCompatActivity {
+    private static final String TAG = "TicketsActivity";
     private RecyclerView recyclerView;
     private TicketAdapter ticketAdapter;
-    private FirebaseFirestore db;
+    private BookingRepository bookingRepository;
+    private ShowtimeRepository showtimeRepository;
+    private TheatreRepository theatreRepository;
+    private MovieRepository movieRepository;
     private FirebaseAuth auth;
+    private Map<String, Theatre> theatreMap;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_tickets);
 
-        db = FirebaseClient.getFirestore();
-        auth = FirebaseClient.getAuth();
+        auth = FirebaseAuth.getInstance();
+        bookingRepository = new BookingRepository();
+        showtimeRepository = new ShowtimeRepository();
+        theatreRepository = new TheatreRepository();
+        movieRepository = new MovieRepository(this); // Truyền context nếu cần
+        theatreMap = new HashMap<>();
 
         setupRecyclerView();
-        setupBottomNavigation(); // Thêm Bottom Navigation
+        setupBottomNavigation();
+        loadTheatres();
         fetchUserTickets();
     }
 
@@ -51,50 +70,127 @@ public class TicketsActivity extends AppCompatActivity {
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
         bottomNavigationView.setOnItemSelectedListener(item -> {
             int itemId = item.getItemId();
-
             if (itemId == R.id.nav_movies) {
                 startActivity(new Intent(this, MovieListActivity.class));
-                finish(); // Kết thúc TicketsActivity để tránh chồng activity
+                finish();
                 return true;
             } else if (itemId == R.id.nav_theatres) {
-                // TODO: Implement TheatresActivity
                 showToast("Chức năng rạp chưa được triển khai");
                 return true;
             } else if (itemId == R.id.nav_tickets) {
-                // Đã ở TicketsActivity, không cần chuyển
                 return true;
             } else if (itemId == R.id.nav_profile) {
-                // TODO: Implement ProfileActivity
                 showToast("Chức năng tài khoản chưa được triển khai");
                 return true;
             }
-
             return false;
         });
-        bottomNavigationView.setSelectedItemId(R.id.nav_tickets); // Đánh dấu Tickets là mục hiện tại
+        bottomNavigationView.setSelectedItemId(R.id.nav_tickets);
+    }
+
+    private void loadTheatres() {
+        theatreRepository.getAllTheatres(new TheatreRepository.TheatreCallback<List<Theatre>>() {
+            @Override
+            public void onSuccess(List<Theatre> theatres) {
+                for (Theatre theatre : theatres) {
+                    theatreMap.put(theatre.getId(), theatre);
+                }
+                Log.d(TAG, "Loaded " + theatreMap.size() + " theatres");
+            }
+
+            @Override
+            public void onFailure(String error) {
+                Log.e(TAG, "Failed to load theatres: " + error);
+                showToast("Lỗi khi tải danh sách rạp: " + error);
+            }
+        });
     }
 
     private void fetchUserTickets() {
-        String userId = auth.getCurrentUser() != null ? auth.getCurrentUser().getUid() : null;
-        if (userId == null) {
+        FirebaseUser currentUser = auth.getCurrentUser();
+        if (currentUser == null) {
             showToast("Vui lòng đăng nhập để xem vé");
             finish();
             return;
         }
+        String userId = currentUser.getUid();
 
-        db.collection("bookings")
-                .whereEqualTo("userId", userId)
-                .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    List<Booking> bookings = new ArrayList<>();
-                    for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
-                        Booking booking = document.toObject(Booking.class);
-                        booking.setId(document.getId());
-                        bookings.add(booking);
+        bookingRepository.getBookingsByUserId(userId, new BookingRepository.BookingCallback<List<Booking>>() {
+            @Override
+            public void onSuccess(List<Booking> bookings) {
+                Log.d(TAG, "Fetched " + bookings.size() + " bookings");
+                fetchShowtimeDetails(bookings);
+            }
+
+            @Override
+            public void onFailure(String error) {
+                Log.e(TAG, "Failed to fetch bookings: " + error);
+                showToast("Lỗi khi tải vé: " + error);
+            }
+        });
+    }
+
+    private void fetchShowtimeDetails(List<Booking> bookings) {
+        List<Booking> updatedBookings = new ArrayList<>(bookings);
+        int[] completedCount = {0};
+
+        if (bookings.isEmpty()) {
+            ticketAdapter.updateTickets(updatedBookings);
+            return;
+        }
+
+        for (Booking booking : updatedBookings) {
+            showtimeRepository.getShowtimeDetail(booking.getShowtimeId(), new ShowtimeRepository.ShowtimeCallback<Showtime>() {
+                @Override
+                public void onSuccess(Showtime showtime) {
+                    booking.setShowtime(showtime);
+                    Theatre theatre = theatreMap.get(showtime.getTheatreId());
+                    if (theatre != null) {
+                        showtime.setTheatre(theatre);
+                    } else {
+                        Log.w(TAG, "Theatre not found for theatreId: " + showtime.getTheatreId());
                     }
-                    ticketAdapter.updateTickets(bookings);
-                })
-                .addOnFailureListener(e -> showToast("Lỗi khi tải vé: " + e.getMessage()));
+                    fetchMovieDetails(showtime, booking, updatedBookings, completedCount);
+                }
+
+                @Override
+                public void onFailure(String error) {
+                    Log.e(TAG, "Failed to fetch showtime " + booking.getShowtimeId() + ": " + error);
+                    synchronized (completedCount) {
+                        completedCount[0]++;
+                        if (completedCount[0] == bookings.size()) {
+                            ticketAdapter.updateTickets(updatedBookings);
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    private void fetchMovieDetails(Showtime showtime, Booking booking, List<Booking> updatedBookings, int[] completedCount) {
+        movieRepository.getMovieDetail(showtime.getMovieId(), new MovieRepository.MovieCallback<Movie>() {
+            @Override
+            public void onSuccess(Movie movie) {
+                showtime.setMovie(movie);
+                synchronized (completedCount) {
+                    completedCount[0]++;
+                    if (completedCount[0] == updatedBookings.size()) {
+                        ticketAdapter.updateTickets(updatedBookings);
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(String error) {
+                Log.e(TAG, "Failed to fetch movie " + showtime.getMovieId() + ": " + error);
+                synchronized (completedCount) {
+                    completedCount[0]++;
+                    if (completedCount[0] == updatedBookings.size()) {
+                        ticketAdapter.updateTickets(updatedBookings);
+                    }
+                }
+            }
+        });
     }
 
     private void showToast(String message) {
