@@ -36,11 +36,19 @@ public class TicketAdapter extends RecyclerView.Adapter<TicketAdapter.TicketView
         Booking booking = tickets.get(position);
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
 
-        holder.movieTitle.setText(booking.getShowtime().getMovie().getTitle());
-        holder.theatreName.setText(booking.getShowtime().getTheatre().getName());
-        holder.showtime.setText(dateFormat.format(booking.getShowtime().getStartTime()));
-        holder.seats.setText(String.join(", ", booking.getSeats()));
-        holder.bookingCode.setText(booking.getBookingCode());
+        // Lấy thông tin từ Showtime
+        String movieTitle = (booking.getShowtime() != null && booking.getShowtime().getMovie() != null)
+                ? booking.getShowtime().getMovie().getTitle() : "Không xác định";
+        String theatreName = (booking.getShowtime() != null && booking.getShowtime().getTheatre() != null)
+                ? booking.getShowtime().getTheatre().getName() : "Không xác định";
+        String showtimeText = (booking.getShowtime() != null && booking.getShowtime().getStartTime() != null)
+                ? dateFormat.format(booking.getShowtime().getStartTime()) : "Không xác định";
+
+        holder.movieTitle.setText(movieTitle);
+        holder.theatreName.setText(theatreName);
+        holder.showtime.setText(showtimeText);
+        holder.seats.setText(booking.getSeats() != null ? String.join(", ", booking.getSeats()) : "Không có ghế");
+        holder.bookingCode.setText(booking.getBookingCode() != null ? booking.getBookingCode() : "Không có mã");
 
         holder.itemView.setOnClickListener(v -> listener.onTicketClick(booking));
     }
@@ -52,7 +60,7 @@ public class TicketAdapter extends RecyclerView.Adapter<TicketAdapter.TicketView
 
     public void updateTickets(List<Booking> newTickets) {
         tickets.clear();
-        tickets.addAll(newTickets);
+        tickets.addAll(newTickets != null ? newTickets : new ArrayList<>());
         notifyDataSetChanged();
     }
 

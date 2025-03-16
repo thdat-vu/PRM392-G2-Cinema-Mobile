@@ -38,20 +38,31 @@ public class TicketDetailActivity extends AppCompatActivity {
 
     private void displayTicketDetail(Booking booking) {
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
-        Locale vnLocale = new Locale("vi", "VN"); // Dùng Locale Việt Nam để định dạng tiền tệ
+        Locale vnLocale = new Locale("vi", "VN");
 
-        tvMovieTitle.setText(booking.getShowtime().getMovie().getTitle());
-        tvTheatreName.setText(booking.getShowtime().getTheatre().getName());
-        tvShowtime.setText(dateFormat.format(booking.getShowtime().getStartTime()));
-        tvSeats.setText(String.join(", ", booking.getSeats()));
-        tvBookingCode.setText(booking.getBookingCode());
-        tvTotalAmount.setText(String.format(vnLocale, "%,d VNĐ", (long) booking.getTotalAmount())); // Sửa thành %,d cho số nguyên
+        String movieTitle = (booking.getShowtime() != null && booking.getShowtime().getMovie() != null)
+                ? booking.getShowtime().getMovie().getTitle() : "Không xác định";
+        String theatreName = (booking.getShowtime() != null && booking.getShowtime().getTheatre() != null)
+                ? booking.getShowtime().getTheatre().getName() : "Không xác định";
+        String showtimeText = (booking.getShowtime() != null && booking.getShowtime().getStartTime() != null)
+                ? dateFormat.format(booking.getShowtime().getStartTime()) : "Không xác định";
+        String seatsText = (booking.getSeats() != null) ? String.join(", ", booking.getSeats()) : "Không có ghế";
+        String bookingCodeText = (booking.getBookingCode() != null) ? booking.getBookingCode() : "Không có mã";
+
+        tvMovieTitle.setText(movieTitle);
+        tvTheatreName.setText(theatreName);
+        tvShowtime.setText(showtimeText);
+        tvSeats.setText(seatsText);
+        tvBookingCode.setText(bookingCodeText);
+        tvTotalAmount.setText(String.format(vnLocale, "%,d VNĐ", (long) booking.getTotalAmount()));
 
         StringBuilder foodItemsText = new StringBuilder();
         if (booking.getFoodItems() != null && !booking.getFoodItems().isEmpty()) {
             for (Booking.FoodItem item : booking.getFoodItems()) {
                 foodItemsText.append(String.format(vnLocale, "%s (x%d): %,d VNĐ\n",
-                        item.getName(), item.getQuantity(), (long) item.getPrice()));
+                        item.getName() != null ? item.getName() : "Không xác định",
+                        item.getQuantity(),
+                        (long) item.getPrice()));
             }
         } else {
             foodItemsText.append("Không có đồ ăn");
