@@ -14,9 +14,18 @@ import com.g2.moviebooking.R;
 
 public class SeatAdapter extends RecyclerView.Adapter<SeatAdapter.SeatViewHolder> {
     private List<Integer> seatStatusList;
+    private OnSeatSelectedListener onSeatSelectedListener;
+
+    public interface OnSeatSelectedListener {
+        void onSeatSelected(int position, boolean isSelected, String seatLabel);
+    }
 
     public SeatAdapter(List<Integer> seatStatusList) {
         this.seatStatusList = seatStatusList;
+    }
+
+    public void setOnSeatSelectedListener(OnSeatSelectedListener listener) {
+        this.onSeatSelectedListener = listener;
     }
 
     @NonNull
@@ -30,19 +39,32 @@ public class SeatAdapter extends RecyclerView.Adapter<SeatAdapter.SeatViewHolder
     public void onBindViewHolder(@NonNull SeatViewHolder holder, int position) {
         int status = seatStatusList.get(position);
         holder.seatImage.setImageResource(status);
-        holder.seatLabel.setText(getSeatLabel(position));
+        String seatLabel = getSeatLabel(position);
+        holder.seatLabel.setText(seatLabel);
 
         // Set description based on seat status
         holder.seatImage.setContentDescription(getSeatDescription(status));
 
+        // Disable click for reserved seats
+        boolean isReserved = status == R.drawable.reserved_seat;
+        holder.itemView.setEnabled(!isReserved);
+        
         // Handle click event for each seat
         holder.itemView.setOnClickListener(v -> {
+            if (isReserved) return;
+            
             if (seatStatusList.get(position) == R.drawable.available_seat) {
                 // Change to selected
                 seatStatusList.set(position, R.drawable.seat_selected);
+                if (onSeatSelectedListener != null) {
+                    onSeatSelectedListener.onSeatSelected(position, true, seatLabel);
+                }
             } else if (seatStatusList.get(position) == R.drawable.seat_selected) {
                 // Change to available again
                 seatStatusList.set(position, R.drawable.available_seat);
+                if (onSeatSelectedListener != null) {
+                    onSeatSelectedListener.onSeatSelected(position, false, seatLabel);
+                }
             }
             // Notify that this item has changed
             notifyItemChanged(position);
@@ -80,5 +102,4 @@ public class SeatAdapter extends RecyclerView.Adapter<SeatAdapter.SeatViewHolder
             return "Selected seat";
         }
     }
-
 }
