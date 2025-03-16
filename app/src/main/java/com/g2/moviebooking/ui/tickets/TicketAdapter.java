@@ -36,7 +36,6 @@ public class TicketAdapter extends RecyclerView.Adapter<TicketAdapter.TicketView
         Booking booking = tickets.get(position);
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault());
 
-        // Lấy thông tin từ Showtime
         String movieTitle = (booking.getShowtime() != null && booking.getShowtime().getMovie() != null)
                 ? booking.getShowtime().getMovie().getTitle() : "Không xác định";
         String theatreName = (booking.getShowtime() != null && booking.getShowtime().getTheatre() != null)
