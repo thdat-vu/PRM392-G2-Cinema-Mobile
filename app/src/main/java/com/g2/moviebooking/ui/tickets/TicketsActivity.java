@@ -13,6 +13,7 @@ import com.g2.moviebooking.data.model.Movie;
 import com.g2.moviebooking.data.model.Showtime;
 import com.g2.moviebooking.data.model.Theatre;
 import com.g2.moviebooking.data.repository.BookingRepository;
+import com.g2.moviebooking.data.repository.FoodAndDrinkRepository;
 import com.g2.moviebooking.data.repository.MovieRepository;
 import com.g2.moviebooking.data.repository.ShowtimeRepository;
 import com.g2.moviebooking.data.repository.TheatreRepository;
@@ -34,6 +35,7 @@ public class TicketsActivity extends AppCompatActivity {
     private ShowtimeRepository showtimeRepository;
     private TheatreRepository theatreRepository;
     private MovieRepository movieRepository;
+    private FoodAndDrinkRepository foodRepo;
     private FirebaseAuth auth;
     private Map<String, Theatre> theatreMap;
 
@@ -46,7 +48,8 @@ public class TicketsActivity extends AppCompatActivity {
         bookingRepository = new BookingRepository();
         showtimeRepository = new ShowtimeRepository();
         theatreRepository = new TheatreRepository();
-        movieRepository = new MovieRepository(this); // Truyền context nếu cần
+        movieRepository = new MovieRepository(this);
+        foodRepo = new FoodAndDrinkRepository();
         theatreMap = new HashMap<>();
 
         setupRecyclerView();
@@ -172,25 +175,47 @@ public class TicketsActivity extends AppCompatActivity {
             @Override
             public void onSuccess(Movie movie) {
                 showtime.setMovie(movie);
-                synchronized (completedCount) {
-                    completedCount[0]++;
-                    if (completedCount[0] == updatedBookings.size()) {
-                        ticketAdapter.updateTickets(updatedBookings);
-                    }
-                }
+                fetchFoodItems(booking, updatedBookings, completedCount);
             }
 
             @Override
             public void onFailure(String error) {
                 Log.e(TAG, "Failed to fetch movie " + showtime.getMovieId() + ": " + error);
-                synchronized (completedCount) {
-                    completedCount[0]++;
-                    if (completedCount[0] == updatedBookings.size()) {
-                        ticketAdapter.updateTickets(updatedBookings);
-                    }
-                }
+                fetchFoodItems(booking, updatedBookings, completedCount); // Vẫn lấy foodItems dù lỗi movie
             }
         });
+    }
+
+    private void fetchFoodItems(Booking booking, List<Booking> updatedBookings, int[] completedCount) {
+        if (booking.getFoodItems() != null && !booking.getFoodItems().isEmpty()) {
+            foodRepo.getFoodItemsForBooking(booking.getFoodItems())
+                    .thenAccept(foodItems -> {
+                        booking.setFoodItems(foodItems);
+                        synchronized (completedCount) {
+                            completedCount[0]++;
+                            if (completedCount[0] == updatedBookings.size()) {
+                                ticketAdapter.updateTickets(updatedBookings);
+                            }
+                        }
+                    })
+                    .exceptionally(throwable -> {
+                        Log.e(TAG, "Failed to fetch food items for booking " + booking.getId() + ": " + throwable.getMessage());
+                        synchronized (completedCount) {
+                            completedCount[0]++;
+                            if (completedCount[0] == updatedBookings.size()) {
+                                ticketAdapter.updateTickets(updatedBookings);
+                            }
+                        }
+                        return null;
+                    });
+        } else {
+            synchronized (completedCount) {
+                completedCount[0]++;
+                if (completedCount[0] == updatedBookings.size()) {
+                    ticketAdapter.updateTickets(updatedBookings);
+                }
+            }
+        }
     }
 
     private void showToast(String message) {
