@@ -6,6 +6,7 @@ import com.g2.moviebooking.data.model.Booking.FoodItem;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 public class FoodAndDrinkRepository {
     private final FirebaseFirestore db;
@@ -69,6 +70,37 @@ public class FoodAndDrinkRepository {
                     }
                 });
 
+        return future;
+    }
+
+    public CompletableFuture<List<FoodItem>> getAllFoodAndDrinks() {
+        CompletableFuture<List<FoodItem>> future = new CompletableFuture<>();
+        
+        db.collection("foods_drinks")
+            .get()
+            .addOnSuccessListener(queryDocumentSnapshots -> {
+                List<FoodItem> foodItems = new ArrayList<>();
+                for (DocumentSnapshot document : queryDocumentSnapshots.getDocuments()) {
+                    String id = document.getId();
+                    String name = document.getString("name");
+                    Double price = document.getDouble("price");
+                    String imageUrl = document.getString("imageUrl");
+                    
+                    if (name != null && price != null) {
+                        FoodItem item = new FoodItem(id, name, price, 0);
+                        // Set image URL if available
+//                        if (imageUrl != null) {
+//                            item.setImageUrl(imageUrl);
+//                        }
+                        foodItems.add(item);
+                    }
+                }
+                future.complete(foodItems);
+            })
+            .addOnFailureListener(e -> {
+                future.completeExceptionally(new Exception("Failed to fetch food and drink items: " + e.getMessage()));
+            });
+            
         return future;
     }
 }
