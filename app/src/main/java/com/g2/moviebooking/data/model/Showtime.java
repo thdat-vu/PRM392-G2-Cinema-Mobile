@@ -3,8 +3,10 @@ package com.g2.moviebooking.data.model;
 import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class Showtime implements Serializable {
     @SerializedName("_id")
@@ -196,5 +198,15 @@ public class Showtime implements Serializable {
 
     public void setBookedSeats(List<String> bookedSeats) {
         this.bookedSeats = bookedSeats;
+    }
+
+    public String getFormattedShowtime() {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("EEEE, MMM dd, yyyy", Locale.ENGLISH);
+        SimpleDateFormat timeFormat = new SimpleDateFormat("hh:mm a", Locale.ENGLISH); // 12-hour format with AM/PM
+
+        return String.format("%s | %s - %s",
+                dateFormat.format(date),
+                timeFormat.format(startTime),
+                timeFormat.format(endTime));
     }
 }

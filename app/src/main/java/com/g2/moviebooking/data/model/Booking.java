@@ -54,6 +54,19 @@ public class Booking implements Serializable {
     }
 
     public Booking(String id, String userId, String showtimeId, Showtime showtime, List<String> seats,
+                   double totalAmount, String bookingCode, Date bookingDate, String paymentMethod){
+        this.id = id;
+        this.userId = userId;
+        this.showtimeId = showtimeId;
+        this.showtime = showtime;
+        this.seats = seats;
+        this.totalAmount = totalAmount;
+        this.bookingCode = bookingCode;
+        this.bookingDate = bookingDate;
+        this.paymentMethod = paymentMethod;
+    }
+
+    public Booking(String id, String userId, String showtimeId, Showtime showtime, List<String> seats,
                   double totalAmount, String bookingCode, Date bookingDate, String paymentMethod,
                   String paymentStatus, String transactionId, Date transactionTime, String status,
                   List<FoodItem> foodItems) {

@@ -1,5 +1,6 @@
 package com.g2.moviebooking.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -10,6 +11,8 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.g2.moviebooking.utils.Constants;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.g2.moviebooking.R;
@@ -166,6 +169,11 @@ public class ShowtimeSelectionActivity extends AppCompatActivity {
                         showtime.getFormat(),
                         showtime.getLanguage());
                 textView.setText(displayText);
+                textView.setOnClickListener(v -> {
+                    Intent intent = new Intent(ShowtimeSelectionActivity.this, SeatActivity.class);
+                    intent.putExtra(Constants.EXTRA_SHOWTIME, showtime);
+                    startActivity(intent);
+                });
                 return textView;
             }
         };

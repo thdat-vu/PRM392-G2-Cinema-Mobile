@@ -42,12 +42,12 @@ public class PaymentNotificationActivity extends AppCompatActivity {
         
         // Get booking information
         booking = (Booking) intent.getSerializableExtra("booking");
-        String bookingCode = intent.getStringExtra("bookingCode");
+        String bookingCode = booking.getBookingCode();
         
         // Display booking code if payment was successful
         if (booking != null && "Confirmed".equals(booking.getStatus())) {
             tvBookingCode.setVisibility(View.VISIBLE);
-            tvBookingCode.setText("Mã đặt vé: " + booking.getBookingCode());
+            tvBookingCode.setText("Mã đặt vé: " + bookingCode);
             btnViewTickets.setVisibility(View.VISIBLE);
         } else {
             tvBookingCode.setVisibility(View.GONE);
