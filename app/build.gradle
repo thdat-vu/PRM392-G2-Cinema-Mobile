@@ -13,6 +13,7 @@ android {
         targetSdk 35
         versionCode 1
         versionName "1.0"
+
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -29,12 +30,24 @@ android {
     }
 }
 
+// Add this at the top of the dependencies block
+def localProperties = new Properties()
+localProperties.load(new FileInputStream(rootProject.file("local.properties")))
+def zaloPayLibDir = localProperties.getProperty('zalopay.lib.dir', '')
+
 dependencies {
-    // Thư viện AndroidX cơ bản
     implementation libs.appcompat
     implementation libs.material
     implementation libs.activity
     implementation libs.constraintlayout
+
+    // Zalo Pay
+    implementation fileTree(
+            dir: zaloPayLibDir,
+            include: ['*.aar', '*.jar'],
+            exclude: [''])
+    implementation("com.squareup.okhttp3:okhttp:4.6.0")
+    implementation("commons-codec:commons-codec:1.14")
 
     // Thư viện test
     testImplementation libs.junit
@@ -61,7 +74,7 @@ dependencies {
 
     // ViewPager2 để tạo giao diện phân trang
     implementation 'androidx.viewpager2:viewpager2:1.0.0'
-    
+
     // ZXing for QR code generation
     implementation 'com.google.zxing:core:3.4.1'
 
