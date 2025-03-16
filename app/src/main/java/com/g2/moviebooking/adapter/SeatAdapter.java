@@ -1,4 +1,4 @@
-package com.g2.moviebooking.ui;
+package com.g2.moviebooking.adapter;
 
 import android.view.LayoutInflater;
 import android.view.View;
