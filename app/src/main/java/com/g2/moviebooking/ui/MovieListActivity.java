@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.PagerSnapHelper;
 import androidx.recyclerview.widget.RecyclerView;
@@ -11,12 +12,13 @@ import com.g2.moviebooking.R;
 import com.g2.moviebooking.data.model.Movie;
 import com.g2.moviebooking.data.repository.MovieRepository;
 import com.g2.moviebooking.ui.tickets.TicketsActivity;
+import com.g2.moviebooking.utils.Constants;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import java.util.ArrayList;
 import java.util.List;
 
 public class MovieListActivity extends AppCompatActivity {
-    private static final int PAGE_SIZE = 10;
+    private static final int PAGE_SIZE = Constants.PAGE_SIZE;
 
     private RecyclerView recyclerView;
     private MovieAdapter movieAdapter;
@@ -25,6 +27,8 @@ public class MovieListActivity extends AppCompatActivity {
     private int currentPage = 1;
     private boolean isLoading = false;
     private boolean hasMoreMovies = true;
+    private List<Movie> allMovies = new ArrayList<>();
+    private SearchView searchView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,6 +37,7 @@ public class MovieListActivity extends AppCompatActivity {
 
         movieRepository = new MovieRepository(this);
         setupRecyclerView();
+        setupSearchView();
         setupBottomNavigation();
         fetchMovies(currentPage);
     }
@@ -66,6 +71,49 @@ public class MovieListActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    private void setupSearchView() {
+        searchView = findViewById(R.id.search_view_movies);
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                searchMoviesByTitle(query);
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                if (newText.isEmpty()) {
+                    // If search text is cleared, show all movies
+                    movieAdapter.updateMovies(allMovies);
+                } else {
+                    // Search as user types
+                    searchMoviesByTitle(newText);
+                }
+                return true;
+            }
+        });
+    }
+
+    private void searchMoviesByTitle(String query) {
+        if (query.isEmpty()) {
+            movieAdapter.updateMovies(allMovies);
+            return;
+        }
+
+        List<Movie> filteredMovies = new ArrayList<>();
+        for (Movie movie : allMovies) {
+            if (movie.getTitle().toLowerCase().contains(query.toLowerCase())) {
+                filteredMovies.add(movie);
+            }
+        }
+
+        if (filteredMovies.isEmpty()) {
+            showToast("Không tìm thấy phim nào phù hợp");
+        }
+
+        movieAdapter.updateMovies(filteredMovies);
     }
 
     private void setupBottomNavigation() {
@@ -103,6 +151,7 @@ public class MovieListActivity extends AppCompatActivity {
                 if (movies.size() < PAGE_SIZE) {
                     hasMoreMovies = false;
                 }
+                allMovies.addAll(movies);
                 movieAdapter.addMovies(movies);
             }
 
