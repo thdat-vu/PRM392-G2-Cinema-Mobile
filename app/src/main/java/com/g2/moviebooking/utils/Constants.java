@@ -4,7 +4,9 @@ package com.g2.moviebooking.utils;
  * Constants used throughout the application
  */
 public class Constants {
-    
+
+    //Page size constants
+    public static final int PAGE_SIZE = 10;
     // Pricing constants
     public static final double SEAT_PRICE = 100000.0; // 100,000 
     public static final double BASE_TOTAL_AMOUNT = 0.0;
