@@ -5,13 +5,19 @@ import android.os.Bundle;
 import android.os.StrictMode;
 import android.util.Log;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.g2.moviebooking.R;
 import com.g2.moviebooking.data.model.Booking;
+import com.g2.moviebooking.data.model.Movie;
+import com.g2.moviebooking.data.model.Showtime;
+import com.g2.moviebooking.data.model.Theatre;
 import com.g2.moviebooking.ui.payment.Api.CreateOrder;
 import com.g2.moviebooking.ui.payment.Constant.AppInfo;
 import com.g2.moviebooking.utils.Constants;
@@ -31,15 +37,15 @@ import vn.zalopay.sdk.ZaloPaySDK;
 import vn.zalopay.sdk.listeners.PayOrderListener;
 
 public class PaymentActivity extends AppCompatActivity {
-    TextView tvAmount, selectedSeatsText;
+    TextView tvAmount, selectedSeatsText, tvCinemaName, tvFilmName,
+            tvShowtime, tvFormat, tvScreen;
+    ImageView imgFilm;
     Button btnCheckout;
     
     // Booking information
     private double totalAmount;
     private String[] selectedSeats;
-    private String movieTitle;
-    private String theatreName;
-    private String showtimeText;
+    private Showtime showtime;
     private String bookingCode;
     
     @Override
@@ -51,6 +57,12 @@ public class PaymentActivity extends AppCompatActivity {
         tvAmount = findViewById(R.id.tvAmount);
         selectedSeatsText = findViewById(R.id.tvSelectedSeatsText);
         btnCheckout = findViewById(R.id.btnCheckout);
+        tvCinemaName = findViewById(R.id.tvCinemaName);
+        tvFilmName = findViewById(R.id.tvFilmName);
+        tvShowtime = findViewById(R.id.tvShowtime);
+        tvFormat = findViewById(R.id.tvFormat);
+        tvScreen = findViewById(R.id.tvScreen);
+        imgFilm = findViewById(R.id.imgFilm);
 
         StrictMode.ThreadPolicy policy = new
                 StrictMode.ThreadPolicy.Builder().permitAll().build();
@@ -64,34 +76,25 @@ public class PaymentActivity extends AppCompatActivity {
         
         // Display total amount
         NumberFormat formatter = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
-        String totalString = String.format("%.0f", totalAmount);
         String totalFormatted = formatter.format(totalAmount);
-        tvAmount.setText(totalFormatted);
-        
-        // Display selected seats
-        if (selectedSeats != null && selectedSeats.length > 0) {
-            String seatsText = String.join(", ", selectedSeats);
-            selectedSeatsText.setText(seatsText);
-        } else {
-            selectedSeatsText.setText("Không có ghế nào được chọn");
-        }
+        displayUI(totalFormatted);
 
         btnCheckout.setOnClickListener(v -> {
             CreateOrder orderApi = new CreateOrder();
             try {
+                String totalString = String.format("%.0f", totalAmount);
                 JSONObject data = orderApi.createOrder(totalString);
                 String code = data.getString("return_code");
 
                 if (code.equals("1")) {
                     String token = data.getString("zp_trans_token");
-                    String transactionId = data.getString("order_id");
                     
                     // Make sure this URL matches your intent filter scheme and host
                     ZaloPaySDK.getInstance().payOrder(PaymentActivity.this, token, "demozpdk://app", new PayOrderListener() {
                         @Override
-                        public void onPaymentSucceeded(String s, String s1, String s2) {
+                        public void onPaymentSucceeded(String transactionId, String transToken, String appTransID) {
                             // Create booking object with payment information
-                            Booking booking = createBookingObject(transactionId, "Completed");
+                            Booking booking = createBookingObject(appTransID, "Completed");
                             
                             // Pass booking information to success screen
                             Intent intent1 = new Intent(PaymentActivity.this, PaymentNotificationActivity.class);
@@ -103,9 +106,9 @@ public class PaymentActivity extends AppCompatActivity {
                         }
 
                         @Override
-                        public void onPaymentCanceled(String s, String s1) {
+                        public void onPaymentCanceled(String zpTransToken, String appTransID) {
                             // Create booking object with canceled status
-                            Booking booking = createBookingObject(transactionId, "Canceled");
+                            Booking booking = createBookingObject(appTransID, "Canceled");
                             
                             Intent intent2 = new Intent(PaymentActivity.this, PaymentNotificationActivity.class);
                             intent2.putExtra("result", "Thanh toán đã được hủy");
@@ -114,11 +117,11 @@ public class PaymentActivity extends AppCompatActivity {
                         }
 
                         @Override
-                        public void onPaymentError(ZaloPayError zaloPayError, String s, String s1) {
-                            Log.e("ZaloPay Error", "Error: " + zaloPayError.toString() + " | " + s + " | " + s1);
+                        public void onPaymentError(ZaloPayError zaloPayError, String zpTransToken, String appTransID) {
+                            Log.e("ZaloPay Error", "Error: " + zaloPayError.toString() + " | " + zpTransToken + " | " + appTransID);
                             
                             // Create booking object with error status
-                            Booking booking = createBookingObject(transactionId, "Failed");
+                            Booking booking = createBookingObject(appTransID, "Failed");
                             
                             Intent intent3 = new Intent(PaymentActivity.this, PaymentNotificationActivity.class);
                             intent3.putExtra("result", "Lỗi thanh toán: " + zaloPayError.toString());
@@ -133,7 +136,7 @@ public class PaymentActivity extends AppCompatActivity {
             }
         });
     }
-    
+
     private void getBookingInfoFromIntent() {
         Intent intent = getIntent();
         
@@ -142,11 +145,9 @@ public class PaymentActivity extends AppCompatActivity {
         
         // Get selected seats
         selectedSeats = intent.getStringArrayExtra(Constants.EXTRA_SELECTED_SEATS);
-        
-        // Get movie information
-        movieTitle = intent.getStringExtra(Constants.EXTRA_MOVIE_TITLE);
-        theatreName = intent.getStringExtra(Constants.EXTRA_THEATRE_NAME);
-        showtimeText = intent.getStringExtra(Constants.EXTRA_SHOWTIME);
+
+        // Get showtime information
+        showtime = (Showtime) intent.getSerializableExtra(Constants.EXTRA_SHOWTIME);
         
         // Generate a unique booking code
         bookingCode = generateBookingCode();
@@ -175,6 +176,9 @@ public class PaymentActivity extends AppCompatActivity {
         if (selectedSeats != null) {
             booking.setSeats(Arrays.asList(selectedSeats));
         }
+
+        // Set showtime
+        booking.setShowtime(showtime);
         
         // Set status based on payment status
         if ("Completed".equals(paymentStatus)) {
@@ -199,5 +203,31 @@ public class PaymentActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         //  ZaloPaySDK.getInstance().onActivityResult(requestCode, resultCode, data);
+    }
+
+    private void displayUI(String totalFormatted){
+        Movie movie = showtime.getMovie();
+        Theatre theatre = showtime.getTheatre();
+
+        tvAmount.setText(totalFormatted);
+        tvCinemaName.setText(theatre.getName());
+        tvFilmName.setText(movie.getTitle());
+        tvShowtime.setText(showtime.getFormattedShowtime());
+        tvFormat.setText(showtime.getFormat());
+        tvScreen.setText(showtime.getScreenName());
+        Glide.with(this)
+                .load(movie.getBannerUrl())
+                .placeholder(R.drawable.ic_launcher_background)
+                .error(R.drawable.ic_launcher_background)
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .into(imgFilm);
+
+        // Display selected seats
+        if (selectedSeats != null && selectedSeats.length > 0) {
+            String seatsText = String.join(", ", selectedSeats);
+            selectedSeatsText.setText(seatsText);
+        } else {
+            selectedSeatsText.setText("Không có ghế nào được chọn");
+        }
     }
 }

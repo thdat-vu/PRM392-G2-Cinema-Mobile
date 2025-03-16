@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.g2.moviebooking.R;
+import com.g2.moviebooking.data.model.Showtime;
 import com.g2.moviebooking.ui.payment.PaymentActivity;
 import com.g2.moviebooking.utils.Constants;
 
@@ -29,11 +30,13 @@ public class SeatActivity extends AppCompatActivity {
     private List<String> selectedSeats = new ArrayList<>();
     private double totalAmount = Constants.BASE_TOTAL_AMOUNT;
     private NumberFormat currencyFormatter;
+    private Showtime showtime;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_seats_booking);
+        showtime = (Showtime) getIntent().getSerializableExtra(Constants.EXTRA_SHOWTIME);
 
         // Initialize currency formatter for Vietnamese Dong
         currencyFormatter = NumberFormat.getCurrencyInstance(new Locale("vi", "VN"));
@@ -108,16 +111,9 @@ public class SeatActivity extends AppCompatActivity {
             // Pass selected seats and total amount using constants for keys
             intent.putExtra(Constants.EXTRA_TOTAL_AMOUNT, totalAmount);
             intent.putExtra(Constants.EXTRA_SELECTED_SEATS, selectedSeats.toArray(new String[0]));
-            
-            // Get movie info from intent if available
-            if (getIntent().hasExtra(Constants.EXTRA_MOVIE_TITLE)) {
-                intent.putExtra(Constants.EXTRA_MOVIE_TITLE, getIntent().getStringExtra(Constants.EXTRA_MOVIE_TITLE));
-            }
-            if (getIntent().hasExtra(Constants.EXTRA_THEATRE_NAME)) {
-                intent.putExtra(Constants.EXTRA_THEATRE_NAME, getIntent().getStringExtra(Constants.EXTRA_THEATRE_NAME));
-            }
+
             if (getIntent().hasExtra(Constants.EXTRA_SHOWTIME)) {
-                intent.putExtra(Constants.EXTRA_SHOWTIME, getIntent().getStringExtra(Constants.EXTRA_SHOWTIME));
+                intent.putExtra(Constants.EXTRA_SHOWTIME, showtime);
             }
             
             startActivity(intent);
