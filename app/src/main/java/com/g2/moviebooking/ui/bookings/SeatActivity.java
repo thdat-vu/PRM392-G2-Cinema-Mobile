@@ -1,9 +1,8 @@
-package com.g2.moviebooking.ui;
+package com.g2.moviebooking.ui.bookings;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -11,6 +10,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.g2.moviebooking.R;
+import com.g2.moviebooking.adapter.SeatAdapter;
 import com.g2.moviebooking.data.model.Showtime;
 import com.g2.moviebooking.ui.payment.PaymentActivity;
 import com.g2.moviebooking.utils.Constants;
@@ -106,7 +106,7 @@ public class SeatActivity extends AppCompatActivity {
             }
             
             // Create intent to payment activity
-            Intent intent = new Intent(SeatActivity.this, PaymentActivity.class);
+            Intent intent = new Intent(SeatActivity.this, FoodDrinksActivity.class);
             
             // Pass selected seats and total amount using constants for keys
             intent.putExtra(Constants.EXTRA_TOTAL_AMOUNT, totalAmount);

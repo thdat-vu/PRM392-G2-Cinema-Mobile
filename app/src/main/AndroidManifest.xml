@@ -5,7 +5,6 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
-
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -16,6 +15,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.PRM392G2MovieBookingMobileApp"
         tools:targetApi="31">
+        <activity
+            android:name=".ui.bookings.FoodDrinksActivity"
+            android:exported="false" />
         <activity
             android:name=".ui.bookings.BookingHistoryListActivity"
             android:exported="false" />
@@ -31,12 +33,14 @@
 
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
+
                 <data
                     android:host="app"
                     android:scheme="demozpdk" />
             </intent-filter>
         </activity>
-        <activity android:name=".ui.auth.LoginActivity"
+        <activity
+            android:name=".ui.auth.LoginActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -49,10 +53,10 @@
         <activity android:name=".ui.tickets.TicketsActivity" />
         <activity android:name=".ui.tickets.TicketDetailActivity" />
         <activity android:name=".ui.ShowtimeSelectionActivity" />
-        <activity android:name=".ui.SeatActivity" />
-        <activity android:name=".ui.payment.PaymentNotificationActivity" android:exported="true"/>
-
+        <activity android:name=".ui.bookings.SeatActivity" />
+        <activity
+            android:name=".ui.payment.PaymentNotificationActivity"
+            android:exported="true" />
     </application>
-
 
 </manifest>
