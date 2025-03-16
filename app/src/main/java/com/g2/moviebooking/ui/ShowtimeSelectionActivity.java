@@ -17,12 +17,19 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.g2.moviebooking.R;
 import com.g2.moviebooking.data.model.Showtime;
+import com.g2.moviebooking.data.model.Theatre;
+import com.g2.moviebooking.data.repository.ShowtimeRepository;
+import com.g2.moviebooking.data.repository.TheatreRepository;
+
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.TimeZone;
 
 public class ShowtimeSelectionActivity extends AppCompatActivity {
@@ -35,7 +42,9 @@ public class ShowtimeSelectionActivity extends AppCompatActivity {
     private String movieTitle;
     private List<Date> availableDates;
     private List<Showtime> showtimes;
-    private FirebaseFirestore db;
+    private ShowtimeRepository showtimeRepository;
+    private TheatreRepository theatreRepository;
+    private Map<String, Theatre> theatreMap; // Lưu trữ thông tin rạp theo theatreId
     private SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
     private SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
 
@@ -43,9 +52,6 @@ public class ShowtimeSelectionActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_showtime_selection);
-
-        // Initialize Firestore
-        db = FirebaseFirestore.getInstance();
 
         // Get movieId and movieTitle from intent
         movieId = getIntent().getStringExtra("MOVIE_ID");
@@ -66,23 +72,33 @@ public class ShowtimeSelectionActivity extends AppCompatActivity {
         // Set movie title
         tvMovieTitle.setText(movieTitle);
 
+        // Initialize repositories
+        showtimeRepository = new ShowtimeRepository();
+        theatreRepository = new TheatreRepository();
+        theatreMap = new HashMap<>();
+
         // Initialize data
         showtimes = new ArrayList<>();
         availableDates = generateDateList();
 
-        // Setup date spinner
+        // Setup UI
         setupDateSpinner();
-
-        // Setup showtimes list
         setupShowtimesList();
+
+        // Load all theatres upfront
+        loadTheatres();
     }
 
     private List<Date> generateDateList() {
         List<Date> dates = new ArrayList<>();
-        Calendar calendar = Calendar.getInstance();
+        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("GMT+07:00"));
         calendar.set(2025, Calendar.MARCH, 15); // Set to March 15, 2025
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
 
-        for (int i = 0; i < 7; i++) { // 7 days from March 15
+        for (int i = 0; i < 7; i++) { // 7 days
             dates.add(calendar.getTime());
             calendar.add(Calendar.DAY_OF_MONTH, 1);
         }
@@ -100,7 +116,6 @@ public class ShowtimeSelectionActivity extends AppCompatActivity {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerDates.setAdapter(adapter);
 
-        // Handle date selection
         spinnerDates.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -110,50 +125,81 @@ public class ShowtimeSelectionActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-                // Do nothing
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
+    }
+
+    private void loadTheatres() {
+        theatreRepository.getAllTheatres(new TheatreRepository.TheatreCallback<List<Theatre>>() {
+            @Override
+            public void onSuccess(List<Theatre> theatres) {
+                for (Theatre theatre : theatres) {
+                    theatreMap.put(theatre.getId(), theatre);
+                }
+                Log.d(TAG, "Loaded " + theatreMap.size() + " theatres");
+            }
+
+            @Override
+            public void onFailure(String error) {
+                Log.e(TAG, "Failed to load theatres: " + error);
+                Toast.makeText(ShowtimeSelectionActivity.this, "Lỗi khi tải danh sách rạp: " + error, Toast.LENGTH_SHORT).show();
             }
         });
     }
 
     private void fetchShowtimesForDate(Date selectedDate) {
-        // Normalize the selected date to the start of the day in UTC
-        Calendar selectedCal = Calendar.getInstance();
+        Calendar selectedCal = Calendar.getInstance(TimeZone.getTimeZone("GMT+07:00"));
         selectedCal.setTime(selectedDate);
         selectedCal.set(Calendar.HOUR_OF_DAY, 0);
         selectedCal.set(Calendar.MINUTE, 0);
         selectedCal.set(Calendar.SECOND, 0);
         selectedCal.set(Calendar.MILLISECOND, 0);
 
-        // Convert to UTC
-        selectedCal.setTimeZone(TimeZone.getTimeZone("UTC"));
         Date startOfDay = selectedCal.getTime();
-        Log.d(TAG, "Querying for movieId: " + movieId + ", date: " + startOfDay + " (UTC timestamp: " + startOfDay.getTime() + ")");
 
-        // Query Firestore for showtimes on the selected date for the selected movie
-        db.collection("showtimes")
-                .whereEqualTo("movieId", movieId)
-                .whereEqualTo("date", startOfDay)
-                .orderBy("startTime", Query.Direction.ASCENDING)
-                .get()
-                .addOnSuccessListener(querySnapshot -> {
-                    showtimes.clear();
-                    Log.d(TAG, "Query returned " + querySnapshot.size() + " documents");
-                    for (var doc : querySnapshot) {
-                        Showtime showtime = doc.toObject(Showtime.class);
-                        showtime.setId(doc.getId());
-                        showtimes.add(showtime);
-                        Log.d(TAG, "Showtime: " + timeFormat.format(showtime.getStartTime()) + " at " + showtime.getTheatre().getName());
+        Log.d(TAG, "Querying showtimes for movieId: " + movieId + ", date: " + startOfDay);
+
+        showtimeRepository.getShowtimesByMovieId(movieId, new ShowtimeRepository.ShowtimeCallback<List<Showtime>>() {
+            @Override
+            public void onSuccess(List<Showtime> result) {
+                Log.d(TAG, "Showtimes fetched: " + result.size());
+                for (Showtime showtime : result) {
+                    Log.d(TAG, "Showtime ID: " + showtime.getId() + ", Date: " + dateFormat.format(showtime.getDate()));
+                    // Gán thông tin theatre từ theatreMap
+                    Theatre theatre = theatreMap.get(showtime.getTheatreId());
+                    if (theatre != null) {
+                        showtime.setTheatre(theatre);
+                    } else {
+                        Log.w(TAG, "Theatre not found for theatreId: " + showtime.getTheatreId());
                     }
-                    updateShowtimesList();
-                })
-                .addOnFailureListener(e -> {
-                    Log.e(TAG, "Error fetching showtimes: " + e.getMessage());
-                    Toast.makeText(ShowtimeSelectionActivity.this,
-                            "Lỗi khi tải suất chiếu: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    showtimes.clear();
-                    updateShowtimesList();
-                });
+                }
+                showtimes.clear();
+                for (Showtime showtime : result) {
+                    if (isSameDay(showtime.getDate(), selectedDate)) {
+                        Log.d(TAG, "Matched showtime: " + showtime.getId() + ", Start Time: " + timeFormat.format(showtime.getStartTime()));
+                        showtimes.add(showtime);
+                    }
+                }
+                Collections.sort(showtimes, (s1, s2) -> s1.getStartTime().compareTo(s2.getStartTime()));
+                updateShowtimesList();
+            }
+
+            @Override
+            public void onFailure(String error) {
+                Log.e(TAG, "Failed to fetch showtimes: " + error);
+                Toast.makeText(ShowtimeSelectionActivity.this, "Lỗi khi tải suất chiếu: " + error, Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    private boolean isSameDay(Date date1, Date date2) {
+        Calendar cal1 = Calendar.getInstance(TimeZone.getTimeZone("GMT+07:00"));
+        cal1.setTime(date1);
+        Calendar cal2 = Calendar.getInstance(TimeZone.getTimeZone("GMT+07:00"));
+        cal2.setTime(date2);
+        Log.d(TAG, "Comparing: " + dateFormat.format(date1) + " vs " + dateFormat.format(date2));
+        return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
+                cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR);
     }
 
     private void setupShowtimesList() {
@@ -163,9 +209,10 @@ public class ShowtimeSelectionActivity extends AppCompatActivity {
             public View getView(int position, View convertView, android.view.ViewGroup parent) {
                 TextView textView = (TextView) super.getView(position, convertView, parent);
                 Showtime showtime = showtimes.get(position);
+                String theatreName = (showtime.getTheatre() != null) ? showtime.getTheatre().getName() : "Rạp không xác định";
                 String displayText = String.format("%s - %s (%s) - %s",
                         timeFormat.format(showtime.getStartTime()),
-                        showtime.getTheatre().getName(),
+                        theatreName,
                         showtime.getFormat(),
                         showtime.getLanguage());
                 textView.setText(displayText);
@@ -181,6 +228,12 @@ public class ShowtimeSelectionActivity extends AppCompatActivity {
     }
 
     private void updateShowtimesList() {
-        ((ArrayAdapter) lvShowtimes.getAdapter()).notifyDataSetChanged();
+        Log.d(TAG, "Updating showtimes list with " + showtimes.size() + " items");
+        ArrayAdapter adapter = (ArrayAdapter) lvShowtimes.getAdapter();
+        if (adapter != null) {
+            adapter.notifyDataSetChanged();
+        } else {
+            Log.e(TAG, "Adapter is null, cannot update showtimes list");
+        }
     }
 }
