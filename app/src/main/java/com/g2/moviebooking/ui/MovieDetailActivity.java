@@ -24,6 +24,7 @@ public class MovieDetailActivity extends AppCompatActivity {
     private Button btnSelectShowtime;
     private MovieRepository movieRepository;
     private Movie movie;
+    private ImageView btnBack;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +54,9 @@ public class MovieDetailActivity extends AppCompatActivity {
         tvActors = findViewById(R.id.tv_movie_actors);
         tvRating = findViewById(R.id.tv_movie_rating);
         btnSelectShowtime = findViewById(R.id.btn_select_showtime);
+        btnBack = findViewById(R.id.buttonBack);
+
+        btnBack.setOnClickListener(v -> onBackPressed());
 
         // Handle button click to go to ShowtimeSelectionActivity
         btnSelectShowtime.setOnClickListener(v -> {

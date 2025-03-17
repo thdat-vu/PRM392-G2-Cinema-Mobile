@@ -2,9 +2,11 @@ package com.g2.moviebooking.ui.bookings;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -15,6 +17,7 @@ import com.g2.moviebooking.adapter.FoodDrinkAdapter;
 import com.g2.moviebooking.data.model.Booking;
 import com.g2.moviebooking.data.model.Showtime;
 import com.g2.moviebooking.model.FoodDrink;
+import com.g2.moviebooking.data.repository.FoodAndDrinkRepository;
 import com.g2.moviebooking.ui.payment.PaymentActivity;
 import com.g2.moviebooking.utils.Constants;
 
@@ -23,8 +26,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import com.g2.moviebooking.data.model.Booking.FoodItem;
+
 public class FoodDrinksActivity extends AppCompatActivity implements FoodDrinkAdapter.OnQuantityChangeListener {
 
+    private static final String TAG = "FoodDrinksActivity";
     private RecyclerView rvFoodDrinks;
     private TextView tvTotalAmount;
     private Button btnContinue;
@@ -32,6 +38,7 @@ public class FoodDrinksActivity extends AppCompatActivity implements FoodDrinkAd
     
     private List<FoodDrink> foodDrinkList;
     private FoodDrinkAdapter adapter;
+    private FoodAndDrinkRepository foodAndDrinkRepository;
     
     // Data to pass to next activity
     private String movieId;
@@ -43,6 +50,9 @@ public class FoodDrinksActivity extends AppCompatActivity implements FoodDrinkAd
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_food_drinks);
+        
+        // Initialize repository
+        foodAndDrinkRepository = new FoodAndDrinkRepository();
         
         // Initialize views
         rvFoodDrinks = findViewById(R.id.rvFoodDrinks);
@@ -64,11 +74,14 @@ public class FoodDrinksActivity extends AppCompatActivity implements FoodDrinkAd
         rvFoodDrinks.setLayoutManager(new LinearLayoutManager(this));
         
         // Initialize food and drink list
-        initFoodDrinkList();
+        foodDrinkList = new ArrayList<>();
         
-        // Set up adapter
+        // Set up adapter with empty list initially
         adapter = new FoodDrinkAdapter(this, foodDrinkList, this);
         rvFoodDrinks.setAdapter(adapter);
+        
+        // Fetch food and drink items
+        initFoodDrinkList();
         
         // Set up click listeners
         btnBack.setOnClickListener(v -> onBackPressed());
@@ -105,17 +118,56 @@ public class FoodDrinksActivity extends AppCompatActivity implements FoodDrinkAd
         updateTotalAmount();
     }
     
-    // TODO: Fetch API 
     private void initFoodDrinkList() {
-        foodDrinkList = new ArrayList<>();
+        // Show loading state if needed
         
-        // Add sample food and drink items
+        foodAndDrinkRepository.getAllFoodAndDrinks()
+            .thenAccept(foodItems -> {
+                // Update UI on the main thread
+                runOnUiThread(() -> {
+                    foodDrinkList.clear();
+                    
+                    // Convert FoodItem to FoodDrink
+                    for (FoodItem foodItem : foodItems) {
+                        FoodDrink foodDrink = new FoodDrink(
+                            foodItem.getId(),
+                            foodItem.getName(),
+                            foodItem.getPrice(),
+                            "" // Empty image URL for now
+                        );
+                        foodDrink.setQuantity(foodItem.getQuantity());
+                        foodDrinkList.add(foodDrink);
+                    }
+                    
+                    adapter.notifyDataSetChanged();
+                    updateTotalAmount();
+                    Log.d(TAG, "Loaded " + foodItems.size() + " food and drink items");
+                });
+            })
+            .exceptionally(throwable -> {
+                // Handle error on the main thread
+                runOnUiThread(() -> {
+                    Toast.makeText(FoodDrinksActivity.this, 
+                        "Lỗi khi tải danh sách đồ ăn: " + throwable.getMessage(), 
+                        Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, "Error loading food and drinks: " + throwable.getMessage());
+                    
+                    // Load fallback data in case of error
+                    loadFallbackFoodDrinkData();
+                });
+                return null;
+            });
+    }
+    
+    private void loadFallbackFoodDrinkData() {
+        // Fallback to hardcoded data in case the repository fails
+        foodDrinkList.clear();
         foodDrinkList.add(new FoodDrink("1", "iCombo 2 Big STD", 109000, ""));
         foodDrinkList.add(new FoodDrink("2", "iCombo 1 Big STD", 89000, ""));
         foodDrinkList.add(new FoodDrink("3", "iCombo 1 Big Extra STD", 109000, ""));
         foodDrinkList.add(new FoodDrink("4", "iCombo 2 Big Extra STD", 129000, ""));
-        
-        // In a real app, you would fetch this data from a database or API
+        adapter.notifyDataSetChanged();
+        updateTotalAmount();
     }
     
     private double calculateTotalAmount() {

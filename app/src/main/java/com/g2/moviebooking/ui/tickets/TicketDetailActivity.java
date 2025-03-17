@@ -5,17 +5,21 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import com.g2.moviebooking.R;
 import com.g2.moviebooking.data.model.Booking;
+import com.g2.moviebooking.data.repository.FoodAndDrinkRepository;
 import java.text.SimpleDateFormat;
+import java.util.List;
 import java.util.Locale;
 
 public class TicketDetailActivity extends AppCompatActivity {
     private TextView tvMovieTitle, tvTheatreName, tvShowtime, tvSeats, tvBookingCode, tvTotalAmount, tvFoodItems;
+    private FoodAndDrinkRepository foodRepo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ticket_detail);
 
+        foodRepo = new FoodAndDrinkRepository();
         setupViews();
 
         Booking booking = (Booking) getIntent().getSerializableExtra("BOOKING");
@@ -56,17 +60,25 @@ public class TicketDetailActivity extends AppCompatActivity {
         tvBookingCode.setText(bookingCodeText);
         tvTotalAmount.setText(String.format(vnLocale, "%,d VNĐ", (long) booking.getTotalAmount()));
 
-        StringBuilder foodItemsText = new StringBuilder();
+        // Lấy thông tin foodItems từ FoodAndDrinkRepository
         if (booking.getFoodItems() != null && !booking.getFoodItems().isEmpty()) {
-            for (Booking.FoodItem item : booking.getFoodItems()) {
-                foodItemsText.append(String.format(vnLocale, "%s (x%d): %,d VNĐ\n",
-                        item.getName() != null ? item.getName() : "Không xác định",
-                        item.getQuantity(),
-                        (long) item.getPrice()));
-            }
+            foodRepo.getFoodItemsForBooking(booking.getFoodItems())
+                    .thenAccept(foodItems -> {
+                        StringBuilder foodItemsText = new StringBuilder();
+                        for (Booking.FoodItem item : foodItems) {
+                            foodItemsText.append(String.format(vnLocale, "%s (x%d): %,d VNĐ\n",
+                                    item.getName() != null ? item.getName() : "Không xác định",
+                                    item.getQuantity(),
+                                    (long) (item.getPrice() * item.getQuantity())));
+                        }
+                        runOnUiThread(() -> tvFoodItems.setText(foodItemsText.toString()));
+                    })
+                    .exceptionally(throwable -> {
+                        runOnUiThread(() -> tvFoodItems.setText("Lỗi khi tải đồ ăn: " + throwable.getMessage()));
+                        return null;
+                    });
         } else {
-            foodItemsText.append("Không có đồ ăn");
+            tvFoodItems.setText("Không có đồ ăn");
         }
-        tvFoodItems.setText(foodItemsText.toString());
     }
 }

@@ -58,8 +58,6 @@ public class BookingHistoryListActivity extends AppCompatActivity {
     private void initViews() {
         recyclerViewBookings = findViewById(R.id.recyclerViewBookings);
         emptyStateLayout = findViewById(R.id.emptyStateLayout);
-        tabLayout = findViewById(R.id.tabLayout);
-        fabFilter = findViewById(R.id.fabFilter);
         btnBack = findViewById(R.id.btnBack);
         btnSupport = findViewById(R.id.btnSupport);
         btnClose = findViewById(R.id.btnClose);
