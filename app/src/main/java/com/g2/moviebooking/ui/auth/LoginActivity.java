@@ -1,8 +1,17 @@
 package com.g2.moviebooking.ui.auth;
 
 import android.content.Intent;
+import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.style.StyleSpan;
+import android.view.LayoutInflater;
+import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import com.g2.moviebooking.R;
@@ -20,11 +29,20 @@ public class LoginActivity extends AppCompatActivity {
 
     private Button btnGoogleSignIn;
     private AuthRepository authRepository;
+    private TextView tvRegister;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        // Khởi tạo TextView sau khi setContentView
+        tvRegister = findViewById(R.id.tv_register);
+
+        String text = "Chưa có tài khoản? Đăng ký ngay";
+        SpannableString spannable = new SpannableString(text);
+        spannable.setSpan(new StyleSpan(Typeface.BOLD), text.indexOf("Đăng ký ngay"), text.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        tvRegister.setText(spannable);
 
         authRepository = new AuthRepository(this);
         setupViews();
@@ -33,7 +51,32 @@ public class LoginActivity extends AppCompatActivity {
 
     private void setupViews() {
         btnGoogleSignIn = findViewById(R.id.btn_google_sign_in);
+        Drawable googleIcon = getResources().getDrawable(R.drawable.ic_google);
+        googleIcon.setBounds(0, 0, 60, 60); // Điều chỉnh kích thước icon
+        btnGoogleSignIn.setCompoundDrawables(googleIcon, null, null, null);
     }
+
+    private void showCustomToast(String message, boolean isSuccess) {
+        LayoutInflater inflater = getLayoutInflater();
+        View layout = inflater.inflate(R.layout.custom_toast, findViewById(R.id.tv_toast_message));
+
+        TextView textView = layout.findViewById(R.id.tv_toast_message);
+        ImageView iconView = layout.findViewById(R.id.img_toast_icon);
+
+        textView.setText(message);
+
+        if (isSuccess) {
+            iconView.setImageResource(R.drawable.ic_success);
+        } else {
+            iconView.setImageResource(R.drawable.ic_error);
+        }
+
+        Toast toast = new Toast(getApplicationContext());
+        toast.setDuration(Toast.LENGTH_SHORT);
+        toast.setView(layout);
+        toast.show();
+    }
+
 
     private void setupListeners() {
         btnGoogleSignIn.setOnClickListener(v -> signInWithGoogle());
@@ -63,17 +106,17 @@ public class LoginActivity extends AppCompatActivity {
             authRepository.loginWithGoogle(account.getIdToken(), new AuthRepository.AuthCallback() {
                 @Override
                 public void onSuccess(FirebaseUser user) {
-                    showToast("Đăng nhập Google thành công!");
+                    showCustomToast("Đăng nhập Google thành công!", true);
                     navigateToMovieList();
                 }
 
                 @Override
                 public void onFailure(String error) {
-                    showToast("Đăng nhập Google thất bại: " + error);
+                    showCustomToast("Đăng nhập Google thất bại: " + error, false);
                 }
             });
         } catch (ApiException e) {
-            showToast("Google Sign-In thất bại: " + e.getMessage());
+            showCustomToast("Google Sign-In thất bại: " + e.getMessage(), false);
         }
     }
 
