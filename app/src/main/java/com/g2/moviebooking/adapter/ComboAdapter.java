@@ -13,6 +13,7 @@ import com.bumptech.glide.Glide;
 import com.g2.moviebooking.R;
 import com.g2.moviebooking.model.FoodDrink;
 
+import java.text.NumberFormat;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -60,7 +61,8 @@ public class ComboAdapter extends RecyclerView.Adapter<ComboAdapter.ComboViewHol
         public void bind(FoodDrink combo) {
             tvComboName.setText(combo.getName());
             // Format the price with commas, then append "đ"
-            tvComboPrice.setText(String.format(Locale.getDefault(), "%,dđ", combo.getPrice()));
+            NumberFormat currencyFormat = NumberFormat.getNumberInstance(new Locale("vi", "VN"));
+            tvComboPrice.setText(currencyFormat.format(combo.getPrice()) + "đ");
             tvComboQuantity.setText("x" + combo.getQuantity());
 
             // If you use an image loading library like Glide or Picasso, load imageUrl here:
