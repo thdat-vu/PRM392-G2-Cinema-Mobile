@@ -1,6 +1,8 @@
 package com.g2.moviebooking.model;
 
-public class FoodDrink {
+import java.io.Serializable;
+
+public class FoodDrink implements Serializable {
     private String id;
     private String name;
     private double price;

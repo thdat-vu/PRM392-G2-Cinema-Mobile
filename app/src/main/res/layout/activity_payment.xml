@@ -1,219 +1,365 @@
 <?xml version="1.0" encoding="utf-8"?>
- <androidx.constraintlayout.widget.ConstraintLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/layoutRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp"
-    tools:context=".ui.payment.PaymentActivity"
-    android:background="@color/white">
+    android:orientation="vertical"
+    android:background="#F8F8F8">
 
-    <!-- Title -->
+    <!-- Header (custom AppBar) -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingVertical="12dp"
+        android:paddingHorizontal="16dp"
+        android:background="#FFC0CB"
+        android:gravity="center_vertical">
+
+    <!-- Back button -->
+    <ImageView
+        android:id="@+id/ivBack"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@drawable/ic_back" />
+
+    <!-- Title, centered horizontally -->
     <TextView
-        android:id="@+id/tvTitle"
+        android:id="@+id/tvHeaderTitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:text="Thông tin thanh toán"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:textColor="@android:color/black" />
+
+    <!-- Close or other icon (optional) -->
+    <ImageView
+        android:id="@+id/ivClose"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@drawable/ic_close" />
+</LinearLayout>
+
+    <!-- Scrollable content below the header -->
+<ScrollView
+android:layout_width="match_parent"
+android:layout_height="0dp"
+android:layout_weight="1"
+android:padding="16dp">
+
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <!-- Section Title -->
+    <TextView
+        android:id="@+id/tvBookingInfoTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Thanh toán"
-        android:textSize="24sp"
+        android:text="Thông tin đặt vé"
+        android:textSize="14sp"
         android:textStyle="bold"
-        android:textColor="@color/black"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        android:textColor="#333333" />
 
-    <!-- Movie Details -->
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/cardMovieDetails"
-        android:layout_width="0dp"
+    <!-- Notice card -->
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:cardCornerRadius="12dp"
-        app:cardElevation="6dp"
-        app:layout_constraintTop_toBottomOf="@id/tvTitle"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="24dp"
-        android:padding="16dp">
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal"
+        android:padding="12dp">
+        <!-- For a rounded corner background, create bg_notice_card.xml in drawable -->
 
-        <LinearLayout
-            android:layout_width="match_parent"
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp" />
+
+        <TextView
+            android:id="@+id/tvNotice"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="10dp">
+            android:layout_marginStart="8dp"
+            android:layout_weight="1"
+            android:text="Bạn ơi, vé đã mua sẽ không thể hoàn, huỷ, đổi vé. Bạn nhớ kiểm tra kỹ thông tin nha!"
+            android:textSize="13sp"
+            android:textColor="#FF0000" />
+    </LinearLayout>
 
-            <TextView
-                android:id="@+id/tvMovieName"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Tên phim: Avengers Endgame"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:textColor="@color/black"/>
-
-            <TextView
-                android:id="@+id/tvShowtime"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Suất chiếu: 19:30 - 20/03/2025"
-                android:textSize="16sp"
-                android:layout_marginTop="8dp"/>
-
-            <TextView
-                android:id="@+id/tvSeat"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Ghế: A10, A11"
-                android:textSize="16sp"
-                android:layout_marginTop="8dp"/>
-
-        </LinearLayout>
-    </com.google.android.material.card.MaterialCardView>
-
-    <!-- Order Summary -->
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/cardOrderSummary"
-        android:layout_width="0dp"
+    <!-- Ticket info card -->
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:cardCornerRadius="12dp"
-        app:cardElevation="6dp"
-        app:layout_constraintTop_toBottomOf="@id/cardMovieDetails"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="16dp"
-        android:padding="16dp">
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal"
+        android:padding="12dp">
+        <!-- For a card-like look, create bg_ticket_card.xml with white background & rounded corners -->
 
+        <!-- Movie poster -->
+        <ImageView
+            android:id="@+id/ivMoviePoster"
+            android:layout_width="60dp"
+            android:layout_height="80dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/placeholder_poster" />
+
+        <!-- Movie details -->
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            android:layout_weight="1"
             android:orientation="vertical">
 
-            <!-- Ticket Row -->
+            <!-- Row with rating badge + cinema name -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:padding="10dp">
+                android:gravity="center_vertical">
 
+                <!-- Rating badge -->
                 <TextView
-                    android:id="@+id/tvTickets"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Vé xem phim (x2)"
-                    android:textColor="@color/black"
-                    android:textSize="16sp" />
-
-                <TextView
-                    android:id="@+id/tvTicketPrice"
+                    android:id="@+id/tvRating"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="400.000 VND"
-                    android:textColor="@color/black"
-                    android:textSize="16sp"
+                    android:background="@drawable/circle_background"
+                    android:paddingHorizontal="6dp"
+                    android:paddingVertical="2dp"
+                    android:text="16+"
+                    android:textColor="@android:color/white"
+                    android:textSize="12sp"
                     android:textStyle="bold" />
+
+                <!-- Cinema name -->
+                <TextView
+                    android:id="@+id/tvCinemaName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="CGV Hoàng Văn Thụ"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:textColor="#333333" />
             </LinearLayout>
 
-            <!-- Divider -->
+            <!-- Movie title -->
+            <TextView
+                android:id="@+id/tvMovieTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Sát Thủ Vô Cùng Cực Hài"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="#000000" />
+
+            <!-- Movie description or rating note -->
+            <TextView
+                android:id="@+id/tvMovieDescription"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="Phim được phổ biến đến người xem từ đủ 16 tuổi trở lên"
+                android:textSize="12sp"
+                android:textColor="#666666" />
+
+            <!-- Dashed divider (optional). Could use an image or shape. -->
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:layout_marginVertical="8dp"
-                android:background="@android:color/darker_gray" />
+                android:background="@drawable/ic_back" />
 
-            <!-- Popcorn Row -->
+            <!-- Showtime info row -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:padding="10dp">
+                android:weightSum="2">
 
-                <TextView
-                    android:id="@+id/tvPopcorn"
+                <!-- Time range -->
+                <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Bắp rang bơ (x1)"
-                    android:textColor="@color/black"
-                    android:textSize="16sp" />
+                    android:orientation="vertical">
 
-                <TextView
-                    android:id="@+id/tvPopcornPrice"
-                    android:layout_width="wrap_content"
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Thời gian:"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvTimeRange"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="20:00 ~ 21:54\nThứ 2, 17/03/2025"
+                        android:textSize="12sp" />
+                </LinearLayout>
+
+                <!-- Format & seats -->
+                <LinearLayout
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:text="50.000 VND"
-                    android:textColor="@color/black"
-                    android:textSize="16sp"
-                    android:textStyle="bold" />
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Định dạng:"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvFormat"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="2D Lồng tiếng"
+                        android:textSize="12sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="Phòng chiếu: Cinema 3"
+                        android:textSize="12sp" />
+
+                    <TextView
+                        android:id="@+id/tvSeats"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Số ghế: C08, C07"
+                        android:textSize="12sp" />
+                </LinearLayout>
             </LinearLayout>
-
         </LinearLayout>
+    </LinearLayout>
 
-    </com.google.android.material.card.MaterialCardView>
-
-    <!-- Total Price & Payment Options -->
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/cardTotalPrice"
-        android:layout_width="0dp"
+    <!-- Combo section -->
+    <TextView
+        android:id="@+id/tvComboSection"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:cardCornerRadius="12dp"
-        app:cardElevation="6dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        android:padding="16dp"
-        android:layout_marginBottom="16dp">
+        android:layout_marginTop="16dp"
+        android:text="Combo bắp nước"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        android:textColor="#333333" />
 
+    <!-- Combo card -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:orientation="horizontal"
+        android:padding="12dp">
+
+        <!-- Combo image -->
+        <ImageView
+            android:id="@+id/ivComboImage"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/popcorn_combo" />
+
+        <!-- Combo details -->
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="10dp">
-
+            android:layout_marginStart="12dp"
+            android:layout_weight="2"
+            android:orientation="horizontal">
             <LinearLayout
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:layout_weight="1"
+                android:orientation="vertical">
 
-                <TextView
-                    android:id="@+id/tvTotal"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Tổng cộng:"
-                    android:textSize="18sp"
-                    android:textStyle="bold"/>
+            <TextView
+                android:id="@+id/tvComboName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="CGV COMBO"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="#000000" />
 
-                <TextView
-                    android:id="@+id/tvAmount"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="450.000 VND"
-                    android:textSize="18sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/black"/>
+            <TextView
+                android:id="@+id/tvComboPrice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="125.000đ"
+                android:textSize="13sp"
+                android:textColor="#FF5722" />
             </LinearLayout>
 
-            <Button
-                android:id="@+id/btnCheckout"
-                android:layout_width="match_parent"
+            <TextView
+                android:id="@+id/tvComboQuantity"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Thanh toán với ZaloPay"
-                android:textSize="16sp"
-                android:textColor="@android:color/white"
-                android:backgroundTint="#03A9F4"
-                android:layout_marginTop="16dp"
-                android:padding="12dp"/>
-
-            <Button
-                android:id="@+id/btnPayCard"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Thanh toán với thẻ tín dụng"
-                android:textSize="16sp"
-                android:textColor="@android:color/white"
-                android:backgroundTint="@color/colorInactive"
-                android:layout_marginTop="8dp"
-                android:padding="12dp"/>
+                android:layout_marginTop="2dp"
+                android:text="x2"
+                android:textSize="13sp"
+                android:textColor="#757575" />
         </LinearLayout>
-    </com.google.android.material.card.MaterialCardView>
+    </LinearLayout>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <!-- Terms note -->
+    <TextView
+        android:id="@+id/tvTermsNote"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:text="Bằng cách bấm Tiếp tục, bạn đồng ý với các điều khoản này của MoMo và chính sách của rạp"
+        android:textSize="12sp"
+        android:textColor="#757575" />
+
+    <!-- Subtotal row -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/tvSubtotalLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Tạm tính"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textColor="#333333" />
+
+        <TextView
+            android:id="@+id/tvSubtotalAmount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="1.138.000đ"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:textColor="#000000" />
+    </LinearLayout>
+</LinearLayout>
+</ScrollView>
+
+    <!-- Bottom button -->
+<Button
+android:id="@+id/btnContinue"
+android:layout_width="match_parent"
+android:layout_height="wrap_content"
+android:text="Tiếp tục"
+android:textSize="16sp"
+android:textStyle="bold"
+android:textColor="@android:color/white"
+android:backgroundTint="#FF0080"
+    android:layout_margin="16dp" />
+</LinearLayout>

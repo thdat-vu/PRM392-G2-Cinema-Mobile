@@ -14,9 +14,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.g2.moviebooking.R;
 import com.g2.moviebooking.adapter.FoodDrinkAdapter;
+import com.g2.moviebooking.data.model.Booking;
+import com.g2.moviebooking.data.model.Showtime;
 import com.g2.moviebooking.model.FoodDrink;
 import com.g2.moviebooking.data.repository.FoodAndDrinkRepository;
 import com.g2.moviebooking.ui.payment.PaymentActivity;
+import com.g2.moviebooking.utils.Constants;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -39,8 +42,8 @@ public class FoodDrinksActivity extends AppCompatActivity implements FoodDrinkAd
     
     // Data to pass to next activity
     private String movieId;
-    private String showTimeId;
-    private String selectedSeats;
+    private Showtime showtime;
+    private String[] selectedSeats;
     private double ticketPrice;
 
     @Override
@@ -62,8 +65,8 @@ public class FoodDrinksActivity extends AppCompatActivity implements FoodDrinkAd
         Intent intent = getIntent();
         if (intent != null) {
             movieId = intent.getStringExtra("movieId");
-            showTimeId = intent.getStringExtra("showTimeId");
-            selectedSeats = intent.getStringExtra("selectedSeats");
+            showtime = (Showtime) intent.getSerializableExtra(Constants.EXTRA_SHOWTIME);
+            selectedSeats = intent.getStringArrayExtra(Constants.EXTRA_SELECTED_SEATS);
             ticketPrice = intent.getDoubleExtra("ticketPrice", 0);
         }
         
@@ -100,25 +103,14 @@ public class FoodDrinksActivity extends AppCompatActivity implements FoodDrinkAd
             // Create intent for payment details activity
             Intent paymentIntent = new Intent(FoodDrinksActivity.this, PaymentActivity.class);
             paymentIntent.putExtra("movieId", movieId);
-            paymentIntent.putExtra("showTimeId", showTimeId);
-            paymentIntent.putExtra("selectedSeats", selectedSeats);
-            paymentIntent.putExtra("ticketPrice", ticketPrice);
-            paymentIntent.putExtra("foodDrinkPrice", totalAmount);
-            
-            // Convert selected items to string format to pass to next activity
-            StringBuilder foodDrinkDetails = new StringBuilder();
-            for (FoodDrink item : selectedItems) {
-                foodDrinkDetails.append(item.getName())
-                        .append(" x")
-                        .append(item.getQuantity())
-                        .append(", ");
+            paymentIntent.putExtra(Constants.EXTRA_SHOWTIME, showtime);
+            paymentIntent.putExtra(Constants.EXTRA_SELECTED_SEATS, selectedSeats);
+            paymentIntent.putExtra(Constants.EXTRA_SEAT_PRICE, ticketPrice);
+            paymentIntent.putExtra(Constants.EXTRA_FOOD_DRINKS_PRICE, totalAmount);
+
+            if (!selectedItems.isEmpty()){
+                paymentIntent.putExtra(Constants.EXTRA_FOOD_DRINKS_ITEMS, (ArrayList<FoodDrink>) selectedItems);
             }
-            
-            if (foodDrinkDetails.length() > 0) {
-                foodDrinkDetails.delete(foodDrinkDetails.length() - 2, foodDrinkDetails.length());
-                paymentIntent.putExtra("foodDrinkDetails", foodDrinkDetails.toString());
-            }
-            
             startActivity(paymentIntent);
         });
         
