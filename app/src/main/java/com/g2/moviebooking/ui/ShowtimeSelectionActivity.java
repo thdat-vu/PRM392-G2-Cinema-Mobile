@@ -12,6 +12,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.g2.moviebooking.data.model.Movie;
 import com.g2.moviebooking.ui.bookings.SeatActivity;
 import com.g2.moviebooking.utils.Constants;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -41,6 +42,7 @@ public class ShowtimeSelectionActivity extends AppCompatActivity {
     private ListView lvShowtimes;
     private String movieId;
     private String movieTitle;
+    private Movie movie;
     private List<Date> availableDates;
     private List<Showtime> showtimes;
     private ShowtimeRepository showtimeRepository;
@@ -57,6 +59,8 @@ public class ShowtimeSelectionActivity extends AppCompatActivity {
         // Get movieId and movieTitle from intent
         movieId = getIntent().getStringExtra("MOVIE_ID");
         movieTitle = getIntent().getStringExtra("MOVIE_TITLE");
+        movie = (Movie) getIntent().getSerializableExtra(Constants.EXTRA_MOVIE);
+
         Log.d(TAG, "Movie ID: " + movieId + ", Movie Title: " + movieTitle);
 
         if (movieId == null || movieTitle == null) {
@@ -219,6 +223,7 @@ public class ShowtimeSelectionActivity extends AppCompatActivity {
                 textView.setText(displayText);
                 textView.setOnClickListener(v -> {
                     Intent intent = new Intent(ShowtimeSelectionActivity.this, SeatActivity.class);
+                    showtime.setMovie(movie);
                     intent.putExtra(Constants.EXTRA_SHOWTIME, showtime);
                     startActivity(intent);
                 });

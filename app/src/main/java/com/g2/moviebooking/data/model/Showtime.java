@@ -202,11 +202,11 @@ public class Showtime implements Serializable {
 
     public String getFormattedShowtime() {
         SimpleDateFormat dateFormat = new SimpleDateFormat("EEEE, MMM dd, yyyy", Locale.ENGLISH);
-        SimpleDateFormat timeFormat = new SimpleDateFormat("hh:mm a", Locale.ENGLISH); // 12-hour format with AM/PM
+        SimpleDateFormat timeFormat = new SimpleDateFormat("hh:mm", Locale.ENGLISH); // 12-hour format with AM/PM
 
-        return String.format("%s | %s - %s",
-                dateFormat.format(date),
+        return String.format("%s ~ %s,\n%s",
                 timeFormat.format(startTime),
-                timeFormat.format(endTime));
+                timeFormat.format(endTime),
+                dateFormat.format(date));
     }
 }

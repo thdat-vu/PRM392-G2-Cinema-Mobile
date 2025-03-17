@@ -18,4 +18,8 @@ public class Constants {
     public static final String EXTRA_MOVIE_TITLE = "movieTitle";
     public static final String EXTRA_THEATRE_NAME = "theatreName";
     public static final String EXTRA_SHOWTIME = "showtime";
+    public static final String EXTRA_MOVIE = "movie";
+    public static final String EXTRA_SEAT_PRICE = "seatPrice";
+    public static final String EXTRA_FOOD_DRINKS_PRICE = "seatPrice";
+    public static final String EXTRA_FOOD_DRINKS_ITEMS = "selectedFood";
 }

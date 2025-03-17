@@ -14,6 +14,8 @@ import com.g2.moviebooking.R;
 import com.g2.moviebooking.data.model.Movie;
 import com.g2.moviebooking.data.repository.MovieRepository;
 import com.g2.moviebooking.ui.ShowtimeSelectionActivity;
+import com.g2.moviebooking.utils.Constants;
+
 import java.util.List;
 
 public class MovieDetailActivity extends AppCompatActivity {
@@ -58,6 +60,7 @@ public class MovieDetailActivity extends AppCompatActivity {
                 Intent intent = new Intent(MovieDetailActivity.this, ShowtimeSelectionActivity.class);
                 intent.putExtra("MOVIE_ID", movie.getId());
                 intent.putExtra("MOVIE_TITLE", movie.getTitle());
+                intent.putExtra(Constants.EXTRA_MOVIE, movie);
                 startActivity(intent);
             } else {
                 showToast("Vui lòng chờ thông tin phim được tải");

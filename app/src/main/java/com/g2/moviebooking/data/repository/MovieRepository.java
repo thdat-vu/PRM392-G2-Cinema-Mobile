@@ -15,6 +15,10 @@ public class MovieRepository {
         db = FirebaseClient.getFirestore();
     }
 
+    public MovieRepository(){
+        db = FirebaseClient.getFirestore();
+    }
+
     // Gán ID cho Movie
     private void setMovieId(Movie movie, String id) {
         if (movie != null) {
