@@ -14,26 +14,47 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <!-- Banner với kích thước cố định -->
-        <ImageView
-            android:id="@+id/image_view_banner"
+        <!-- FrameLayout chứa banner và giới hạn độ tuổi -->
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="3"
-            android:background="@android:color/darker_gray"
-            android:contentDescription="Movie Banner"
-            android:scaleType="centerCrop" />
+            android:layout_weight="3">
+
+            <!-- Banner -->
+            <ImageView
+                android:id="@+id/image_view_banner"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@android:color/darker_gray"
+                android:contentDescription="Movie Banner"
+                android:scaleType="centerCrop" />
+
+            <TextView
+                android:id="@+id/text_view_age_limit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/age_limit_background"
+                android:textColor="#FFFFFF"
+                android:text="P"
+                android:textStyle="bold"
+                android:textSize="14sp"
+                android:gravity="center"
+                android:layout_gravity="top|end"
+                android:minWidth="28dp"
+                android:minHeight="28dp" />
+
+        </FrameLayout>
 
         <!-- Container cho nội dung -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1.2"
+            android:layout_weight="1.5"
+            android:gravity="center_horizontal"
             android:orientation="vertical"
-            android:padding="8dp"
-            android:gravity="center_horizontal">
+            android:padding="8dp">
 
-            <!-- Tiêu đề phim với chiều cao cố định -->
+            <!-- Tiêu đề phim -->
             <TextView
                 android:id="@+id/text_view_title"
                 android:layout_width="match_parent"
@@ -43,7 +64,7 @@
                 android:maxLines="2"
                 android:minLines="2"
                 android:textColor="@android:color/black"
-                android:textSize="14sp"
+                android:textSize="16sp"
                 android:textStyle="bold"
                 tools:text="Forrest Gump" />
 
@@ -51,9 +72,9 @@
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
                 android:gravity="center"
-                android:orientation="horizontal"
-                android:layout_marginTop="4dp">
+                android:orientation="horizontal">
 
                 <ImageView
                     android:layout_width="14dp"
@@ -69,23 +90,22 @@
                     android:includeFontPadding="false"
                     android:paddingStart="4dp"
                     android:textColor="#FF9800"
-                    android:textSize="12sp"
+                    android:textSize="16sp"
                     tools:text="4.7" />
             </LinearLayout>
 
-            <!-- Thể loại phim với chiều cao cố định -->
+            <!-- Thể loại phim -->
             <TextView
                 android:id="@+id/text_view_genres"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
                 android:ellipsize="end"
                 android:gravity="center"
                 android:maxLines="1"
-                android:layout_marginTop="2dp"
                 android:textColor="#757575"
-                android:textSize="10sp"
+                android:textSize="14sp"
                 tools:text="Drama, Romance" />
-
         </LinearLayout>
     </LinearLayout>
 </androidx.cardview.widget.CardView>

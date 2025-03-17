@@ -3,13 +3,92 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp"
+    android:padding="24dp"
     android:gravity="center">
+
+    <!-- Logo -->
+    <ImageView
+        android:id="@+id/logo"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:contentDescription="App Logo"
+        android:src="@drawable/ic_cinema_logo" />
+
+    <!-- Welcome Text -->
+    <TextView
+        android:id="@+id/tv_welcome"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Đăng nhập để trải nghiệm dịch vụ tốt nhất!"
+        android:textSize="18sp"
+        android:textColor="@color/pink_dark"
+        android:textStyle="bold"
+        android:layout_marginTop="16dp" />
+
+    <!-- Email -->
+    <EditText
+        android:id="@+id/et_email"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Email"
+        android:inputType="textEmailAddress"
+        android:background="@drawable/edittext_background"
+        android:textColor="@color/pink_dark"
+        android:textColorHint="@color/pink_light"
+        android:padding="12dp"
+        android:layout_marginTop="16dp" />
+
+    <!-- Mật khẩu -->
+    <EditText
+        android:id="@+id/et_password"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Mật khẩu"
+        android:inputType="textPassword"
+        android:background="@drawable/edittext_background"
+        android:textColor="@color/pink_dark"
+        android:textColorHint="@color/pink_light"
+        android:padding="12dp"
+        android:layout_marginTop="8dp" />
+
+    <!-- Nút Đăng Nhập -->
+    <Button
+        android:id="@+id/btn_login"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Đăng nhập"
+        android:backgroundTint="@color/pink"
+        android:textColor="@android:color/white"
+        android:layout_marginTop="16dp" />
+
+    <!-- Text phân cách -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Hoặc"
+        android:textSize="16sp"
+        android:textColor="@color/pink_dark"
+        android:layout_marginTop="16dp" />
 
     <Button
         android:id="@+id/btn_google_sign_in"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Đăng nhập bằng Google"
+        android:backgroundTint="@color/pink"
+        android:textColor="@android:color/white"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:gravity="center"
+        android:layout_marginTop="8dp"/>
+
+    <TextView
+        android:id="@+id/tv_register"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Đăng nhập bằng Google" />
+        android:text="Chưa có tài khoản? Đăng ký ngay"
+        android:textSize="16sp"
+        android:textColor="@color/pink_dark"
+        android:layout_marginTop="16dp" />
 
 </LinearLayout>
