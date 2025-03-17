@@ -6,11 +6,15 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+
+
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import com.g2.moviebooking.ui.bookings.SeatActivity;
 import com.g2.moviebooking.utils.Constants;
@@ -36,6 +40,7 @@ import java.util.TimeZone;
 public class ShowtimeSelectionActivity extends AppCompatActivity {
 
     private static final String TAG = "ShowtimeSelectionActivity";
+    private ImageView btnBack;
     private TextView tvMovieTitle;
     private Spinner spinnerDates;
     private ListView lvShowtimes;
@@ -66,6 +71,7 @@ public class ShowtimeSelectionActivity extends AppCompatActivity {
         }
 
         // Initialize views
+        btnBack = findViewById(R.id.btnBack);
         tvMovieTitle = findViewById(R.id.tv_movie_title);
         spinnerDates = findViewById(R.id.spinner_dates);
         lvShowtimes = findViewById(R.id.lv_showtimes);
@@ -88,6 +94,9 @@ public class ShowtimeSelectionActivity extends AppCompatActivity {
 
         // Load all theatres upfront
         loadTheatres();
+
+
+        btnBack.setOnClickListener(v -> onBackPressed());
     }
 
     private List<Date> generateDateList() {
