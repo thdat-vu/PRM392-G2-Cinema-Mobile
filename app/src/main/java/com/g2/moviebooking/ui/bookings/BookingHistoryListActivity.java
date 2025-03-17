@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -15,6 +16,8 @@ import com.g2.moviebooking.data.model.Booking;
 import com.g2.moviebooking.data.model.Movie;
 import com.g2.moviebooking.data.model.Showtime;
 import com.g2.moviebooking.data.model.Theatre;
+import com.g2.moviebooking.ui.MovieListActivity;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 
@@ -49,10 +52,13 @@ public class BookingHistoryListActivity extends AppCompatActivity {
         loadBookings();
         
         // Set up tab layout - moved after loading data
-        setupTabLayout();
+        // setupTabLayout();
         
         // Set up click listeners
-        setupClickListeners();
+        // setupClickListeners();
+
+        // Bottomtabs
+        setupBottomNavigation();
     }
 
     private void initViews() {
@@ -361,14 +367,14 @@ public class BookingHistoryListActivity extends AppCompatActivity {
 
     private void setupClickListeners() {
         btnBack.setOnClickListener(v -> onBackPressed());
-        
+
         btnClose.setOnClickListener(v -> finish());
-        
+
         btnSupport.setOnClickListener(v -> {
             // Handle support button click
             // For example, show a support dialog or navigate to support screen
         });
-        
+
         fabFilter.setOnClickListener(v -> {
             // Handle filter button click
             // For example, show a filter dialog
@@ -411,5 +417,31 @@ public class BookingHistoryListActivity extends AppCompatActivity {
             e.printStackTrace();
             return new Date();
         }
+    }
+
+    private void setupBottomNavigation() {
+        BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
+        bottomNavigationView.setOnItemSelectedListener(item -> {
+            int itemId = item.getItemId();
+            if (itemId == R.id.nav_movies) {
+                startActivity(new Intent(this, MovieListActivity.class));
+                finish();
+                return true;
+            } else if (itemId == R.id.nav_theatres) {
+                showToast("Chức năng rạp chưa được triển khai");
+                return true;
+            } else if (itemId == R.id.nav_tickets) {
+                return true;
+            } else if (itemId == R.id.nav_profile) {
+                showToast("Chức năng tài khoản chưa được triển khai");
+                return true;
+            }
+            return false;
+        });
+        bottomNavigationView.setSelectedItemId(R.id.nav_tickets);
+    }
+
+    private void showToast(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 }

@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.g2.moviebooking.R;
 import com.g2.moviebooking.data.model.Movie;
 import com.g2.moviebooking.data.repository.MovieRepository;
+import com.g2.moviebooking.ui.bookings.BookingHistoryListActivity;
 import com.g2.moviebooking.ui.tickets.TicketsActivity;
 import com.g2.moviebooking.utils.Constants;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -128,7 +129,7 @@ public class MovieListActivity extends AppCompatActivity {
                 showToast("Chức năng rạp chưa được triển khai");
                 return true;
             } else if (itemId == R.id.nav_tickets) {
-                startActivity(new Intent(this, TicketsActivity.class));
+                startActivity(new Intent(this, BookingHistoryListActivity.class));
                 return true;
             } else if (itemId == R.id.nav_profile) {
                 // TODO: Implement ProfileActivity
