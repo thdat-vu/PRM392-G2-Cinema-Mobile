@@ -17,6 +17,7 @@ import com.g2.moviebooking.data.model.Movie;
 import com.g2.moviebooking.data.model.Showtime;
 import com.g2.moviebooking.data.model.Theatre;
 import com.g2.moviebooking.ui.MovieListActivity;
+import com.g2.moviebooking.ui.ProfileActivity;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
@@ -433,7 +434,8 @@ public class BookingHistoryListActivity extends AppCompatActivity {
             } else if (itemId == R.id.nav_tickets) {
                 return true;
             } else if (itemId == R.id.nav_profile) {
-                showToast("Chức năng tài khoản chưa được triển khai");
+                startActivity(new Intent(this, ProfileActivity.class));
+                finish();
                 return true;
             }
             return false;

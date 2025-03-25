@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -19,8 +20,9 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 public class ProfileActivity extends AppCompatActivity {
-    private TextView tvName, tvEmail;
-    private Button btnLogout;
+    private TextView tvGreeting, tvEmail;
+    private EditText etName, etPhone;
+    private Button btnUpdate, btnLogout;
     private FirebaseAuth auth;
     private FirebaseFirestore db;
 
@@ -39,15 +41,17 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void setupViews() {
-        tvName = findViewById(R.id.tv_name);
+        tvGreeting = findViewById(R.id.tv_greeting);
         tvEmail = findViewById(R.id.tv_email);
+        etName = findViewById(R.id.et_name);
+        etPhone = findViewById(R.id.et_phone);
+        btnUpdate = findViewById(R.id.btn_update);
         btnLogout = findViewById(R.id.btn_logout);
     }
 
     private void showCustomToast(String message, boolean isSuccess) {
         LayoutInflater inflater = getLayoutInflater();
         View layout = inflater.inflate(R.layout.custom_toast, findViewById(R.id.tv_toast_message));
-
         TextView textView = layout.findViewById(R.id.tv_toast_message);
         ImageView iconView = layout.findViewById(R.id.img_toast_icon);
 
@@ -61,6 +65,7 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void setupListeners() {
+        btnUpdate.setOnClickListener(v -> updateUserInfo());
         btnLogout.setOnClickListener(v -> logout());
     }
 
@@ -69,7 +74,7 @@ public class ProfileActivity extends AppCompatActivity {
         if (currentUser != null) {
             tvEmail.setText(currentUser.getEmail());
 
-            // Lấy thông tin name từ Firestore
+            // Lấy thông tin từ Firestore
             db.collection("users")
                     .document(currentUser.getUid())
                     .get()
@@ -78,24 +83,78 @@ public class ProfileActivity extends AppCompatActivity {
                             DocumentSnapshot document = task.getResult();
                             if (document.exists()) {
                                 String name = document.getString("name");
-                                tvName.setText(name != null ? name : "Chưa cập nhật");
+                                String phone = document.getString("phone");
+
+                                // Cập nhật lời chào với tên người dùng
+                                tvGreeting.setText("Chào " + (name != null ? name : "Chưa cập nhật"));
+                                etName.setText(name != null ? name : "Chưa cập nhật");
+                                etPhone.setText(phone != null ? phone : "Chưa cập nhật");
                             }
                         } else {
                             showCustomToast("Không thể tải thông tin: " + task.getException().getMessage(), false);
                         }
                     });
         } else {
-            // Nếu không có user đăng nhập, quay về login
             startActivity(new Intent(this, LoginActivity.class));
             finish();
         }
+    }
+
+    private void updateUserInfo() {
+        FirebaseUser currentUser = auth.getCurrentUser();
+        if (currentUser == null) {
+            showCustomToast("Vui lòng đăng nhập lại", false);
+            startActivity(new Intent(this, LoginActivity.class));
+            finish();
+            return;
+        }
+
+        String newName = etName.getText().toString().trim();
+        String newPhone = etPhone.getText().toString().trim();
+
+        // Validate input
+        if (newName.isEmpty()) {
+            showCustomToast("Tên không được để trống", false);
+            return;
+        }
+        if (newPhone.isEmpty()) {
+            showCustomToast("Số điện thoại không được để trống", false);
+            return;
+        }
+        if (!android.util.Patterns.PHONE.matcher(newPhone).matches() || newPhone.length() < 10) {
+            showCustomToast("Số điện thoại không hợp lệ (ít nhất 10 số)", false);
+            return;
+        }
+
+        // Cập nhật Firestore
+        db.collection("users")
+                .document(currentUser.getUid())
+                .update("name", newName, "phone", newPhone)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        showCustomToast("Cập nhật thông tin thành công", true);
+                        tvGreeting.setText("Chào " + newName); // Cập nhật lời chào
+                    } else {
+                        showCustomToast("Cập nhật thất bại: " + task.getException().getMessage(), false);
+                    }
+                });
+
+        // Cập nhật displayName trong FirebaseAuth
+        currentUser.updateProfile(new com.google.firebase.auth.UserProfileChangeRequest.Builder()
+                        .setDisplayName(newName)
+                        .build())
+                .addOnCompleteListener(task -> {
+                    if (!task.isSuccessful()) {
+                        showCustomToast("Cập nhật tên trên FirebaseAuth thất bại: " + task.getException().getMessage(), false);
+                    }
+                });
     }
 
     private void logout() {
         auth.signOut();
         showCustomToast("Đã đăng xuất", true);
         startActivity(new Intent(this, LoginActivity.class));
-        finishAffinity(); // Đóng tất cả activities
+        finishAffinity();
     }
 
     private void setupBottomNavigation() {
@@ -112,13 +171,13 @@ public class ProfileActivity extends AppCompatActivity {
                 return true;
             } else if (itemId == R.id.nav_tickets) {
                 startActivity(new Intent(this, BookingHistoryListActivity.class));
+                finish();
                 return true;
             } else if (itemId == R.id.nav_profile) {
                 return true;
             }
-
             return false;
         });
-        bottomNavigationView.setSelectedItemId(R.id.nav_profile); // Default selection
+        bottomNavigationView.setSelectedItemId(R.id.nav_profile);
     }
 }

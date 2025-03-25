@@ -1,10 +1,12 @@
 package com.g2.moviebooking.data.repository;
 
 import android.content.Context;
+import android.util.Log;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.g2.moviebooking.data.model.User;
 import com.g2.moviebooking.utils.FirebaseClient;
@@ -12,6 +14,7 @@ import com.g2.moviebooking.utils.FirebaseClient;
 public class AuthRepository {
     private final FirebaseAuth auth;
     private final FirebaseFirestore db;
+    private static final String TAG = "AuthRepository";
 
     public AuthRepository(Context context) {
         auth = FirebaseClient.getAuth();
@@ -26,7 +29,22 @@ public class AuthRepository {
                     if (task.isSuccessful()) {
                         FirebaseUser user = auth.getCurrentUser();
                         if (user != null) {
-                            saveUserToFirestore(user, user.getDisplayName(), callback);
+                            // Check if user already exists in Firestore
+                            db.collection("users").document(user.getUid())
+                                    .get()
+                                    .addOnCompleteListener(userTask -> {
+                                        if (userTask.isSuccessful()) {
+                                            if (userTask.getResult().exists()) {
+                                                // User already exists, just call success callback
+                                                callback.onSuccess(user);
+                                            } else {
+                                                // User doesn't exist, save new user
+                                                saveUserToFirestore(user, user.getDisplayName(), null, callback);
+                                            }
+                                        } else {
+                                            callback.onFailure("Không thể kiểm tra thông tin người dùng");
+                                        }
+                                    });
                         } else {
                             callback.onFailure("Không thể lấy thông tin người dùng");
                         }
@@ -43,7 +61,8 @@ public class AuthRepository {
                     if (task.isSuccessful()) {
                         FirebaseUser user = auth.getCurrentUser();
                         if (user != null) {
-                            saveUserToFirestore(user, user.getDisplayName(), callback);
+                            // Không ghi đè Firestore, chỉ trả về user
+                            callback.onSuccess(user);
                         } else {
                             callback.onFailure("Không thể lấy thông tin người dùng");
                         }
@@ -53,26 +72,63 @@ public class AuthRepository {
                 });
     }
 
-    // Đăng ký bằng email và mật khẩu với name
-    public void registerWithEmail(String email, String password, String name, AuthCallback callback) {
-        auth.createUserWithEmailAndPassword(email, password)
+    // Đăng ký bằng email và mật khẩu với name và phone
+    public void registerWithEmail(String email, String password, String name, String phone, AuthCallback callback) {
+        db.collection("users")
+                .whereEqualTo("email", email)
+                .get()
                 .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        FirebaseUser user = auth.getCurrentUser();
-                        if (user != null) {
-                            saveUserToFirestore(user, name, callback);
-                        } else {
-                            callback.onFailure("Không thể lấy thông tin người dùng");
-                        }
+                    if (task.isSuccessful() && !task.getResult().isEmpty()) {
+                        callback.onFailure("Email đã được sử dụng");
                     } else {
-                        callback.onFailure(task.getException().getMessage());
+                        auth.createUserWithEmailAndPassword(email, password)
+                                .addOnCompleteListener(authTask -> {
+                                    if (authTask.isSuccessful()) {
+                                        FirebaseUser user = auth.getCurrentUser();
+                                        if (user != null) {
+                                            Log.d(TAG, "Registering user with name: " + name + ", phone: " + phone);
+                                            updateUserProfileAndFirestore(user, name, phone, callback);
+                                        } else {
+                                            callback.onFailure("Không thể lấy thông tin người dùng");
+                                        }
+                                    } else {
+                                        callback.onFailure(authTask.getException().getMessage());
+                                    }
+                                });
                     }
                 });
     }
 
-    // Helper method để lưu thông tin user vào Firestore với name
-    private void saveUserToFirestore(FirebaseUser user, String name, AuthCallback callback) {
-        User newUser = new User(name, user.getEmail());
+    // Cập nhật profile FirebaseAuth và lưu thông tin vào Firestore (dùng cho register)
+    private void updateUserProfileAndFirestore(FirebaseUser user, String name, String phone, AuthCallback callback) {
+        UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                .setDisplayName(name)
+                .build();
+
+        user.updateProfile(profileUpdates)
+                .addOnCompleteListener(profileTask -> {
+                    if (profileTask.isSuccessful()) {
+                        User newUser = new User(name, user.getEmail(), phone);
+                        db.collection("users").document(user.getUid())
+                                .set(newUser)
+                                .addOnCompleteListener(setTask -> {
+                                    if (setTask.isSuccessful()) {
+                                        Log.d(TAG, "User saved to Firestore with name: " + name + ", phone: " + phone);
+                                        callback.onSuccess(user);
+                                    } else {
+                                        callback.onFailure("Lưu người dùng thất bại: " + setTask.getException().getMessage());
+                                    }
+                                });
+                    } else {
+                        callback.onFailure("Cập nhật profile thất bại: " + profileTask.getException().getMessage());
+                    }
+                });
+    }
+
+    // Lưu thông tin user vào Firestore (dùng cho Google login)
+    private void saveUserToFirestore(FirebaseUser user, String name, String phone, AuthCallback callback) {
+        String displayName = (name != null && !name.isEmpty()) ? name : "Người dùng chưa đặt tên";
+        User newUser = new User(displayName, user.getEmail(), phone);
         db.collection("users").document(user.getUid())
                 .set(newUser)
                 .addOnCompleteListener(setTask -> {
@@ -84,7 +140,6 @@ public class AuthRepository {
                 });
     }
 
-    // Interface callback để xử lý kết quả
     public interface AuthCallback {
         void onSuccess(FirebaseUser user);
         void onFailure(String error);
