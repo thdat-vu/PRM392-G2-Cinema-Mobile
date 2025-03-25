@@ -51,9 +51,9 @@ public class MovieListActivity extends AppCompatActivity {
 
         // Danh sách URL ảnh banner (có thể lấy từ API)
         bannerUrls = Arrays.asList(
-                "https://media1.thehungryjpeg.com/thumbs2/ori_3746269_ix81djx2q4racxqk2170f29bw9lb2yu23aq8o7je_online-cinema-banner-vector-realistic-computer-monitor-movie-brochure-design-template-banner-for-movie-premiere-show-blue-curtain-theater-marketing-luxury-poster-illustration.jpg",
-                "https://media1.thehungryjpeg.com/thumbs2/ori_3746269_ix81djx2q4racxqk2170f29bw9lb2yu23aq8o7je_online-cinema-banner-vector-realistic-computer-monitor-movie-brochure-design-template-banner-for-movie-premiere-show-blue-curtain-theater-marketing-luxury-poster-illustration.jpg",
-                "https://media1.thehungryjpeg.com/thumbs2/ori_3746269_ix81djx2q4racxqk2170f29bw9lb2yu23aq8o7je_online-cinema-banner-vector-realistic-computer-monitor-movie-brochure-design-template-banner-for-movie-premiere-show-blue-curtain-theater-marketing-luxury-poster-illustration.jpg"
+                "https://files.betacorp.vn/media/images/2025/03/25/1702x621-31-095438-250325-87.jpg",
+                "https://media.lottecinemavn.com/Media/MovieFile//MovieImg/202503/11727_105_100001.jpg",
+                "https://iguov8nhvyobj.vcdn.cloud/media/banner/cache/1/b58515f018eb873dafa430b6f9ae0c1e/c/g/cgv_980x448-min.png"
         );
         BannerAdapter bannerAdapter = new BannerAdapter(this, bannerUrls);
         bannerSlider.setAdapter(bannerAdapter);
@@ -74,11 +74,11 @@ public class MovieListActivity extends AppCompatActivity {
                 int currentItem = bannerSlider.getCurrentItem();
                 int nextItem = (currentItem + 1) % bannerUrls.size(); // Quay vòng
                 bannerSlider.setCurrentItem(nextItem, true); // Chuyển trang
-                handler.postDelayed(this, 3000); // Lặp lại sau 3 giây
+                handler.postDelayed(this, 4000); // Lặp lại sau 3 giây
             }
         };
 
-        handler.postDelayed(autoSlideRunnable, 3000); // Bắt đầu auto-slide sau 3 giây
+        handler.postDelayed(autoSlideRunnable, 4000); // Bắt đầu auto-slide sau 3 giây
     }
 
     private void setupRecyclerView() {

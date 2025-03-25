@@ -60,12 +60,13 @@
         android:textColor="@android:color/black"
         android:paddingBottom="8dp" />
 
-    <Spinner
-        android:id="@+id/spinner_dates"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_dates"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
         android:paddingHorizontal="16dp"
+        android:orientation="horizontal"
         />
 
     <!-- Showtimes List -->
