@@ -5,8 +5,8 @@ import android.graphics.Typeface;
 import android.os.Bundle;
 import android.text.Spannable;
 import android.text.SpannableString;
-import android.text.style.StyleSpan;
 import android.text.method.PasswordTransformationMethod;
+import android.text.style.StyleSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -24,8 +24,7 @@ public class RegisterActivity extends AppCompatActivity {
     private Button btnRegister;
     private TextView tvLogin;
     private AuthRepository authRepository;
-    private boolean isPasswordVisible = false;
-    private boolean isConfirmPasswordVisible = false;
+    private boolean isPasswordVisible = false; // Trạng thái chung cho cả hai trường
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +43,10 @@ public class RegisterActivity extends AppCompatActivity {
         etConfirmPassword = findViewById(R.id.et_confirm_password);
         btnRegister = findViewById(R.id.btn_register);
         tvLogin = findViewById(R.id.tv_login);
+
+        // Thiết lập biểu tượng ban đầu cho cả hai trường (ẩn)
+        etPassword.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_eye, 0);
+        etConfirmPassword.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_eye, 0);
 
         String text = "Đã có tài khoản? Đăng nhập ngay";
         SpannableString spannable = new SpannableString(text);
@@ -84,6 +87,7 @@ public class RegisterActivity extends AppCompatActivity {
             finish();
         });
 
+        // Sự kiện nhấn vào biểu tượng của etPassword
         etPassword.setOnTouchListener((v, event) -> {
             if (event.getAction() == android.view.MotionEvent.ACTION_UP) {
                 if (event.getRawX() >= (etPassword.getRight() - etPassword.getCompoundDrawables()[2].getBounds().width())) {
@@ -94,10 +98,11 @@ public class RegisterActivity extends AppCompatActivity {
             return false;
         });
 
+        // Sự kiện nhấn vào biểu tượng của etConfirmPassword
         etConfirmPassword.setOnTouchListener((v, event) -> {
             if (event.getAction() == android.view.MotionEvent.ACTION_UP) {
                 if (event.getRawX() >= (etConfirmPassword.getRight() - etConfirmPassword.getCompoundDrawables()[2].getBounds().width())) {
-                    toggleConfirmPasswordVisibility();
+                    togglePasswordVisibility();
                     return true;
                 }
             }
@@ -106,32 +111,40 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     private void togglePasswordVisibility() {
-        if (isPasswordVisible) {
-            etPassword.setTransformationMethod(PasswordTransformationMethod.getInstance());
-            etPassword.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_eye, 0);
-        } else {
+        if (!isPasswordVisible) {
+            // Hiện cả hai mật khẩu
             etPassword.setTransformationMethod(null);
+            etConfirmPassword.setTransformationMethod(null);
+            etPassword.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_eye_off, 0);
+            etConfirmPassword.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_eye_off, 0);
+        } else {
+            // Ẩn cả hai mật khẩu
+            etPassword.setTransformationMethod(PasswordTransformationMethod.getInstance());
+            etConfirmPassword.setTransformationMethod(PasswordTransformationMethod.getInstance());
             etPassword.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_eye, 0);
+            etConfirmPassword.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_eye, 0);
         }
         isPasswordVisible = !isPasswordVisible;
+        // Giữ con trỏ ở cuối cho cả hai trường
         etPassword.setSelection(etPassword.getText().length());
-    }
-
-    private void toggleConfirmPasswordVisibility() {
-        if (isConfirmPasswordVisible) {
-            etConfirmPassword.setTransformationMethod(PasswordTransformationMethod.getInstance());
-            etConfirmPassword.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_eye, 0);
-        } else {
-            etConfirmPassword.setTransformationMethod(null);
-            etConfirmPassword.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_eye, 0);
-        }
-        isConfirmPasswordVisible = !isConfirmPasswordVisible;
         etConfirmPassword.setSelection(etConfirmPassword.getText().length());
     }
 
     private boolean validateInput(String name, String email, String password, String confirmPassword) {
-        if (name.isEmpty() || email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
-            showCustomToast("Vui lòng điền đầy đủ thông tin", false);
+        if (name.trim().isEmpty()) {
+            showCustomToast("Tên không được để trống", false);
+            return false;
+        }
+        if (email.trim().isEmpty()) {
+            showCustomToast("Email không được để trống", false);
+            return false;
+        }
+        if (password.trim().isEmpty()) {
+            showCustomToast("Mật khẩu không được để trống", false);
+            return false;
+        }
+        if (confirmPassword.trim().isEmpty()) {
+            showCustomToast("Xác nhận mật khẩu không được để trống", false);
             return false;
         }
 
