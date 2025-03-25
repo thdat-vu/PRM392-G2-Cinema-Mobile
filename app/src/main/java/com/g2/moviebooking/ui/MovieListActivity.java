@@ -174,15 +174,13 @@ public class MovieListActivity extends AppCompatActivity {
             if (itemId == R.id.nav_movies) {
                 return true;
             } else if (itemId == R.id.nav_theatres) {
-                // TODO: Implement TheatresActivity
                 showToast("Chức năng rạp chưa được triển khai");
                 return true;
             } else if (itemId == R.id.nav_tickets) {
                 startActivity(new Intent(this, BookingHistoryListActivity.class));
                 return true;
             } else if (itemId == R.id.nav_profile) {
-                // TODO: Implement ProfileActivity
-                showToast("Chức năng tài khoản chưa được triển khai");
+                startActivity(new Intent(this, ProfileActivity.class));
                 return true;
             }
 
