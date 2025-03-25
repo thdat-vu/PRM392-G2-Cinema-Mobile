@@ -29,7 +29,22 @@ public class AuthRepository {
                     if (task.isSuccessful()) {
                         FirebaseUser user = auth.getCurrentUser();
                         if (user != null) {
-                            saveUserToFirestore(user, user.getDisplayName(), null, callback); // Phone là null với Google
+                            // Check if user already exists in Firestore
+                            db.collection("users").document(user.getUid())
+                                    .get()
+                                    .addOnCompleteListener(userTask -> {
+                                        if (userTask.isSuccessful()) {
+                                            if (userTask.getResult().exists()) {
+                                                // User already exists, just call success callback
+                                                callback.onSuccess(user);
+                                            } else {
+                                                // User doesn't exist, save new user
+                                                saveUserToFirestore(user, user.getDisplayName(), null, callback);
+                                            }
+                                        } else {
+                                            callback.onFailure("Không thể kiểm tra thông tin người dùng");
+                                        }
+                                    });
                         } else {
                             callback.onFailure("Không thể lấy thông tin người dùng");
                         }
