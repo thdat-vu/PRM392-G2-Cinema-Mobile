@@ -124,7 +124,14 @@ public class TicketsActivity extends AppCompatActivity {
             @Override
             public void onSuccess(List<Booking> bookings) {
                 Log.d(TAG, "Fetched " + bookings.size() + " bookings");
-                fetchShowtimeDetails(bookings);
+                // Lọc các booking có status là "CONFIRMED"
+                List<Booking> confirmedBookings = new ArrayList<>();
+                for (Booking booking : bookings) {
+                    if ("CONFIRMED".equals(booking.getStatus())) {
+                        confirmedBookings.add(booking);
+                    }
+                }
+                fetchShowtimeDetails(confirmedBookings);
             }
 
             @Override
@@ -183,7 +190,7 @@ public class TicketsActivity extends AppCompatActivity {
             @Override
             public void onFailure(String error) {
                 Log.e(TAG, "Failed to fetch movie " + showtime.getMovieId() + ": " + error);
-                fetchFoodItems(booking, updatedBookings, completedCount); // Vẫn lấy foodItems dù lỗi movie
+                fetchFoodItems(booking, updatedBookings, completedCount);
             }
         });
     }

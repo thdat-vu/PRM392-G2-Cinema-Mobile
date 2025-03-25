@@ -35,11 +35,11 @@ public class FoodDrinksActivity extends AppCompatActivity implements FoodDrinkAd
     private TextView tvTotalAmount;
     private Button btnContinue;
     private ImageButton btnBack, btnClose;
-    
+
     private List<FoodDrink> foodDrinkList;
     private FoodDrinkAdapter adapter;
     private FoodAndDrinkRepository foodAndDrinkRepository;
-    
+
     // Data to pass to next activity
     private String movieId;
     private Showtime showtime;
@@ -50,48 +50,58 @@ public class FoodDrinksActivity extends AppCompatActivity implements FoodDrinkAd
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_food_drinks);
-        
+
         // Initialize repository
         foodAndDrinkRepository = new FoodAndDrinkRepository();
-        
+
         // Initialize views
         rvFoodDrinks = findViewById(R.id.rvFoodDrinks);
         tvTotalAmount = findViewById(R.id.tvTotalAmount);
         btnContinue = findViewById(R.id.btnContinue);
         btnBack = findViewById(R.id.btnBack);
         btnClose = findViewById(R.id.btnClose);
-        
-        // Get data from intent
+
+        // Get data from intent with null checking
         Intent intent = getIntent();
-        if (intent != null) {
-            movieId = intent.getStringExtra("movieId");
-            showtime = (Showtime) intent.getSerializableExtra(Constants.EXTRA_SHOWTIME);
-            selectedSeats = intent.getStringArrayExtra(Constants.EXTRA_SELECTED_SEATS);
-            ticketPrice = intent.getDoubleExtra(Constants.EXTRA_TOTAL_AMOUNT, 0);
+        if (intent == null || !intent.hasExtra(Constants.EXTRA_SHOWTIME)) {
+            Toast.makeText(this, "Dữ liệu không hợp lệ", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
         }
-        
+
+        showtime = (Showtime) intent.getSerializableExtra(Constants.EXTRA_SHOWTIME);
+        selectedSeats = intent.getStringArrayExtra(Constants.EXTRA_SELECTED_SEATS);
+        ticketPrice = intent.getDoubleExtra(Constants.EXTRA_TOTAL_AMOUNT, 0);
+        movieId = intent.getStringExtra("movieId"); // Có thể null, không bắt buộc
+
+        if (showtime == null) {
+            Toast.makeText(this, "Không tìm thấy thông tin suất chiếu", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+
         // Set up RecyclerView
         rvFoodDrinks.setLayoutManager(new LinearLayoutManager(this));
-        
+
         // Initialize food and drink list
         foodDrinkList = new ArrayList<>();
-        
+
         // Set up adapter with empty list initially
         adapter = new FoodDrinkAdapter(this, foodDrinkList, this);
         rvFoodDrinks.setAdapter(adapter);
-        
+
         // Fetch food and drink items
         initFoodDrinkList();
-        
+
         // Set up click listeners
         btnBack.setOnClickListener(v -> onBackPressed());
-        
+
         btnClose.setOnClickListener(v -> finish());
-        
+
         btnContinue.setOnClickListener(v -> {
             // Calculate total amount
             double totalAmount = calculateTotalAmount();
-            
+
             // Create a list of selected food and drinks
             List<FoodDrink> selectedItems = new ArrayList<>();
             for (FoodDrink item : foodDrinkList) {
@@ -99,7 +109,7 @@ public class FoodDrinksActivity extends AppCompatActivity implements FoodDrinkAd
                     selectedItems.add(item);
                 }
             }
-            
+
             // Create intent for payment details activity
             Intent paymentIntent = new Intent(FoodDrinksActivity.this, PaymentActivity.class);
             paymentIntent.putExtra("movieId", movieId);
@@ -108,59 +118,52 @@ public class FoodDrinksActivity extends AppCompatActivity implements FoodDrinkAd
             paymentIntent.putExtra(Constants.EXTRA_SEAT_PRICE, ticketPrice);
             paymentIntent.putExtra(Constants.EXTRA_FOOD_DRINKS_PRICE, totalAmount);
 
-            if (!selectedItems.isEmpty()){
+            if (!selectedItems.isEmpty()) {
                 paymentIntent.putExtra(Constants.EXTRA_FOOD_DRINKS_ITEMS, (ArrayList<FoodDrink>) selectedItems);
             }
             startActivity(paymentIntent);
         });
-        
+
         // Update total amount initially
         updateTotalAmount();
     }
-    
+
     private void initFoodDrinkList() {
-        // Show loading state if needed
-        
         foodAndDrinkRepository.getAllFoodAndDrinks()
-            .thenAccept(foodItems -> {
-                // Update UI on the main thread
-                runOnUiThread(() -> {
-                    foodDrinkList.clear();
-                    
-                    // Convert FoodItem to FoodDrink
-                    for (FoodItem foodItem : foodItems) {
-                        FoodDrink foodDrink = new FoodDrink(
-                            foodItem.getId(),
-                            foodItem.getName(),
-                            foodItem.getPrice(),
-                            "" // Empty image URL for now
-                        );
-                        foodDrink.setQuantity(foodItem.getQuantity());
-                        foodDrinkList.add(foodDrink);
-                    }
-                    
-                    adapter.notifyDataSetChanged();
-                    updateTotalAmount();
-                    Log.d(TAG, "Loaded " + foodItems.size() + " food and drink items");
+                .thenAccept(foodItems -> {
+                    runOnUiThread(() -> {
+                        foodDrinkList.clear();
+
+                        for (FoodItem foodItem : foodItems) {
+                            FoodDrink foodDrink = new FoodDrink(
+                                    foodItem.getId(),
+                                    foodItem.getName(),
+                                    foodItem.getPrice(),
+                                    "" // Empty image URL for now
+                            );
+                            foodDrink.setQuantity(foodItem.getQuantity());
+                            foodDrinkList.add(foodDrink);
+                        }
+
+                        adapter.notifyDataSetChanged();
+                        updateTotalAmount();
+                        Log.d(TAG, "Loaded " + foodItems.size() + " food and drink items");
+                    });
+                })
+                .exceptionally(throwable -> {
+                    runOnUiThread(() -> {
+                        Toast.makeText(FoodDrinksActivity.this,
+                                "Lỗi khi tải danh sách đồ ăn: " + throwable.getMessage(),
+                                Toast.LENGTH_SHORT).show();
+                        Log.e(TAG, "Error loading food and drinks: " + throwable.getMessage());
+
+                        loadFallbackFoodDrinkData();
+                    });
+                    return null;
                 });
-            })
-            .exceptionally(throwable -> {
-                // Handle error on the main thread
-                runOnUiThread(() -> {
-                    Toast.makeText(FoodDrinksActivity.this, 
-                        "Lỗi khi tải danh sách đồ ăn: " + throwable.getMessage(), 
-                        Toast.LENGTH_SHORT).show();
-                    Log.e(TAG, "Error loading food and drinks: " + throwable.getMessage());
-                    
-                    // Load fallback data in case of error
-                    loadFallbackFoodDrinkData();
-                });
-                return null;
-            });
     }
-    
+
     private void loadFallbackFoodDrinkData() {
-        // Fallback to hardcoded data in case the repository fails
         foodDrinkList.clear();
         foodDrinkList.add(new FoodDrink("1", "iCombo 2 Big STD", 109000, ""));
         foodDrinkList.add(new FoodDrink("2", "iCombo 1 Big STD", 89000, ""));
@@ -169,7 +172,7 @@ public class FoodDrinksActivity extends AppCompatActivity implements FoodDrinkAd
         adapter.notifyDataSetChanged();
         updateTotalAmount();
     }
-    
+
     private double calculateTotalAmount() {
         double total = 0;
         for (FoodDrink item : foodDrinkList) {
@@ -177,13 +180,13 @@ public class FoodDrinksActivity extends AppCompatActivity implements FoodDrinkAd
         }
         return total;
     }
-    
+
     private void updateTotalAmount() {
         double total = calculateTotalAmount();
         NumberFormat currencyFormat = NumberFormat.getNumberInstance(new Locale("vi", "VN"));
         tvTotalAmount.setText(currencyFormat.format(total) + "đ");
     }
-    
+
     @Override
     public void onQuantityChanged(List<FoodDrink> foodDrinkList) {
         updateTotalAmount();

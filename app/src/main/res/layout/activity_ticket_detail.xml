@@ -10,71 +10,242 @@
         android:orientation="vertical"
         android:padding="16dp">
 
+        <!-- Tiêu đề chính -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Chi Tiết Vé"
             android:textSize="24sp"
             android:textStyle="bold"
-            android:textColor="@android:color/black" />
+            android:textColor="@android:color/black"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Thông tin phim -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Tên Phim"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/black"
+            android:layout_marginTop="8dp" />
 
         <TextView
             android:id="@+id/ticket_detail_movie_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Movie Title"
+            android:textSize="16sp"
+            android:textColor="@android:color/black"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Thông tin rạp -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Tên Rạp"
             android:textSize="18sp"
             android:textStyle="bold"
-            android:layout_marginTop="16dp" />
+            android:textColor="@android:color/black"
+            android:layout_marginTop="8dp" />
 
         <TextView
             android:id="@+id/ticket_detail_theatre_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Theatre Name"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            android:textColor="@android:color/black"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Thời gian chiếu -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Thời Gian Chiếu"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/black"
+            android:layout_marginTop="8dp" />
 
         <TextView
             android:id="@+id/ticket_detail_showtime"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Showtime"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            android:textColor="@android:color/black"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Ghế ngồi -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Ghế Ngồi"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/black"
+            android:layout_marginTop="8dp" />
 
         <TextView
             android:id="@+id/ticket_detail_seats"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Seats"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            android:textColor="@android:color/black"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Mã đặt vé -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Mã Đặt Vé"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/black"
+            android:layout_marginTop="8dp" />
 
         <TextView
             android:id="@+id/ticket_detail_booking_code"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Booking Code"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            android:textColor="@android:color/black"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Tổng tiền -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Tổng Tiền"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/black"
+            android:layout_marginTop="8dp" />
 
         <TextView
             android:id="@+id/ticket_detail_total_amount"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Total Amount"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            android:textColor="@android:color/black"
+            android:layout_marginBottom="8dp" />
 
+        <!-- Đồ ăn -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Đồ Ăn"
             android:textSize="18sp"
             android:textStyle="bold"
-            android:layout_marginTop="16dp" />
+            android:textColor="@android:color/black"
+            android:layout_marginTop="8dp" />
 
         <TextView
             android:id="@+id/ticket_detail_food_items"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Food Items"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            android:textColor="@android:color/black"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Phương thức thanh toán -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Phương Thức Thanh Toán"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/black"
+            android:layout_marginTop="8dp" />
+
+        <TextView
+            android:id="@+id/ticket_detail_payment_method"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Payment Method"
+            android:textSize="16sp"
+            android:textColor="@android:color/black"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Trạng thái thanh toán -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Trạng Thái Thanh Toán"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/black"
+            android:layout_marginTop="8dp" />
+
+        <TextView
+            android:id="@+id/ticket_detail_payment_status"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Payment Status"
+            android:textSize="16sp"
+            android:textColor="@android:color/black"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Mã giao dịch -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Mã Giao Dịch"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/black"
+            android:layout_marginTop="8dp" />
+
+        <TextView
+            android:id="@+id/ticket_detail_transaction_id"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Transaction ID"
+            android:textSize="16sp"
+            android:textColor="@android:color/black"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Thời gian giao dịch -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Thời Gian Giao Dịch"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/black"
+            android:layout_marginTop="8dp" />
+
+        <TextView
+            android:id="@+id/ticket_detail_transaction_time"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Transaction Time"
+            android:textSize="16sp"
+            android:textColor="@android:color/black"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Trạng thái vé -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Trạng Thái Vé"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/black"
+            android:layout_marginTop="8dp" />
+
+        <TextView
+            android:id="@+id/ticket_detail_status"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Status"
+            android:textSize="16sp"
+            android:textColor="@android:color/black"
+            android:layout_marginBottom="8dp" />
     </LinearLayout>
 </ScrollView>

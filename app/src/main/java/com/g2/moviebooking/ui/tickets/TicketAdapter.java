@@ -42,12 +42,16 @@ public class TicketAdapter extends RecyclerView.Adapter<TicketAdapter.TicketView
                 ? booking.getShowtime().getTheatre().getName() : "Không xác định";
         String showtimeText = (booking.getShowtime() != null && booking.getShowtime().getStartTime() != null)
                 ? dateFormat.format(booking.getShowtime().getStartTime()) : "Không xác định";
+        String statusText = (booking.getStatus() != null) ? booking.getStatus() : "Không xác định";
+        String paymentStatusText = (booking.getPaymentStatus() != null) ? booking.getPaymentStatus() : "Không xác định";
 
         holder.movieTitle.setText(movieTitle);
         holder.theatreName.setText(theatreName);
         holder.showtime.setText(showtimeText);
         holder.seats.setText(booking.getSeats() != null ? String.join(", ", booking.getSeats()) : "Không có ghế");
         holder.bookingCode.setText(booking.getBookingCode() != null ? booking.getBookingCode() : "Không có mã");
+        holder.status.setText(statusText);
+        holder.paymentStatus.setText(paymentStatusText);
 
         holder.itemView.setOnClickListener(v -> listener.onTicketClick(booking));
     }
@@ -64,7 +68,7 @@ public class TicketAdapter extends RecyclerView.Adapter<TicketAdapter.TicketView
     }
 
     static class TicketViewHolder extends RecyclerView.ViewHolder {
-        TextView movieTitle, theatreName, showtime, seats, bookingCode;
+        TextView movieTitle, theatreName, showtime, seats, bookingCode, status, paymentStatus;
 
         TicketViewHolder(View itemView) {
             super(itemView);
@@ -73,6 +77,8 @@ public class TicketAdapter extends RecyclerView.Adapter<TicketAdapter.TicketView
             showtime = itemView.findViewById(R.id.ticket_showtime);
             seats = itemView.findViewById(R.id.ticket_seats);
             bookingCode = itemView.findViewById(R.id.ticket_booking_code);
+            status = itemView.findViewById(R.id.ticket_status);
+            paymentStatus = itemView.findViewById(R.id.ticket_payment_status);
         }
     }
 }
