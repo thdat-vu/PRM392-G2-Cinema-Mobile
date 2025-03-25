@@ -61,13 +61,9 @@ public class SeatActivity extends AppCompatActivity {
     private void initializeSeatStatusList() {
         seatStatusList = new ArrayList<>();
         for (int i = 0; i < 64; i++) {
-            if (i % 5 == 0) {
-                seatStatusList.add(R.drawable.reserved_seat); // Already reserved seats
-            } else {
                 seatStatusList.add(R.drawable.available_seat); // Available seats
             }
         }
-    }
     
     private void setupSeatAdapter() {
         seatAdapter = new SeatAdapter(seatStatusList);
