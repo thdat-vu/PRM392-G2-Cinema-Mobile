@@ -10,6 +10,7 @@ import android.text.style.StyleSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -27,7 +28,8 @@ import com.google.firebase.auth.FirebaseUser;
 public class LoginActivity extends AppCompatActivity {
     private static final int RC_SIGN_IN = 9001;
 
-    private Button btnGoogleSignIn;
+    private Button btnGoogleSignIn, btnLogin;
+    private EditText etEmail, etPassword;
     private AuthRepository authRepository;
     private TextView tvRegister;
 
@@ -36,9 +38,7 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        // Khởi tạo TextView sau khi setContentView
         tvRegister = findViewById(R.id.tv_register);
-
         String text = "Chưa có tài khoản? Đăng ký ngay";
         SpannableString spannable = new SpannableString(text);
         spannable.setSpan(new StyleSpan(Typeface.BOLD), text.indexOf("Đăng ký ngay"), text.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
@@ -51,8 +51,12 @@ public class LoginActivity extends AppCompatActivity {
 
     private void setupViews() {
         btnGoogleSignIn = findViewById(R.id.btn_google_sign_in);
+        btnLogin = findViewById(R.id.btn_login);
+        etEmail = findViewById(R.id.et_email);
+        etPassword = findViewById(R.id.et_password);
+
         Drawable googleIcon = getResources().getDrawable(R.drawable.ic_google);
-        googleIcon.setBounds(0, 0, 60, 60); // Điều chỉnh kích thước icon
+        googleIcon.setBounds(0, 0, 60, 60);
         btnGoogleSignIn.setCompoundDrawables(googleIcon, null, null, null);
     }
 
@@ -64,12 +68,7 @@ public class LoginActivity extends AppCompatActivity {
         ImageView iconView = layout.findViewById(R.id.img_toast_icon);
 
         textView.setText(message);
-
-        if (isSuccess) {
-            iconView.setImageResource(R.drawable.ic_success);
-        } else {
-            iconView.setImageResource(R.drawable.ic_error);
-        }
+        iconView.setImageResource(isSuccess ? R.drawable.ic_success : R.drawable.ic_error);
 
         Toast toast = new Toast(getApplicationContext());
         toast.setDuration(Toast.LENGTH_SHORT);
@@ -77,9 +76,25 @@ public class LoginActivity extends AppCompatActivity {
         toast.show();
     }
 
-
+    // Trong phương thức setupListeners() của LoginActivity, thêm:
     private void setupListeners() {
         btnGoogleSignIn.setOnClickListener(v -> signInWithGoogle());
+
+        btnLogin.setOnClickListener(v -> {
+            String email = etEmail.getText().toString().trim();
+            String password = etPassword.getText().toString().trim();
+
+            if (email.isEmpty() || password.isEmpty()) {
+                showCustomToast("Vui lòng nhập email và mật khẩu", false);
+                return;
+            }
+            signInWithEmail(email, password);
+        });
+
+        tvRegister.setOnClickListener(v -> {
+            startActivity(new Intent(this, RegisterActivity.class));
+            finish();
+        });
     }
 
     private void signInWithGoogle() {
@@ -89,6 +104,21 @@ public class LoginActivity extends AppCompatActivity {
                 .build();
         Intent signInIntent = GoogleSignIn.getClient(this, gso).getSignInIntent();
         startActivityForResult(signInIntent, RC_SIGN_IN);
+    }
+
+    private void signInWithEmail(String email, String password) {
+        authRepository.loginWithEmail(email, password, new AuthRepository.AuthCallback() {
+            @Override
+            public void onSuccess(FirebaseUser user) {
+                showCustomToast("Đăng nhập thành công!", true);
+                navigateToMovieList();
+            }
+
+            @Override
+            public void onFailure(String error) {
+                showCustomToast("Đăng nhập thất bại: " + error, false);
+            }
+        });
     }
 
     @Override
@@ -123,9 +153,5 @@ public class LoginActivity extends AppCompatActivity {
     private void navigateToMovieList() {
         startActivity(new Intent(this, MovieListActivity.class));
         finish();
-    }
-
-    private void showToast(String message) {
-        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 }

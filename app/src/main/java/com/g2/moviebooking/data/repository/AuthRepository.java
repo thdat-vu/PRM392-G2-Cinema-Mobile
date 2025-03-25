@@ -26,21 +26,60 @@ public class AuthRepository {
                     if (task.isSuccessful()) {
                         FirebaseUser user = auth.getCurrentUser();
                         if (user != null) {
-                            User newUser = new User(user.getDisplayName(), user.getEmail());
-                            db.collection("users").document(user.getUid())
-                                    .set(newUser)
-                                    .addOnCompleteListener(setTask -> {
-                                        if (setTask.isSuccessful()) {
-                                            callback.onSuccess(user);
-                                        } else {
-                                            callback.onFailure("Lưu người dùng thất bại: " + setTask.getException().getMessage());
-                                        }
-                                    });
+                            saveUserToFirestore(user, user.getDisplayName(), callback);
                         } else {
                             callback.onFailure("Không thể lấy thông tin người dùng");
                         }
                     } else {
                         callback.onFailure("Đăng nhập thất bại: " + task.getException().getMessage());
+                    }
+                });
+    }
+
+    // Đăng nhập bằng email và mật khẩu
+    public void loginWithEmail(String email, String password, AuthCallback callback) {
+        auth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        FirebaseUser user = auth.getCurrentUser();
+                        if (user != null) {
+                            saveUserToFirestore(user, user.getDisplayName(), callback);
+                        } else {
+                            callback.onFailure("Không thể lấy thông tin người dùng");
+                        }
+                    } else {
+                        callback.onFailure(task.getException().getMessage());
+                    }
+                });
+    }
+
+    // Đăng ký bằng email và mật khẩu với name
+    public void registerWithEmail(String email, String password, String name, AuthCallback callback) {
+        auth.createUserWithEmailAndPassword(email, password)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        FirebaseUser user = auth.getCurrentUser();
+                        if (user != null) {
+                            saveUserToFirestore(user, name, callback);
+                        } else {
+                            callback.onFailure("Không thể lấy thông tin người dùng");
+                        }
+                    } else {
+                        callback.onFailure(task.getException().getMessage());
+                    }
+                });
+    }
+
+    // Helper method để lưu thông tin user vào Firestore với name
+    private void saveUserToFirestore(FirebaseUser user, String name, AuthCallback callback) {
+        User newUser = new User(name, user.getEmail());
+        db.collection("users").document(user.getUid())
+                .set(newUser)
+                .addOnCompleteListener(setTask -> {
+                    if (setTask.isSuccessful()) {
+                        callback.onSuccess(user);
+                    } else {
+                        callback.onFailure("Lưu người dùng thất bại: " + setTask.getException().getMessage());
                     }
                 });
     }
