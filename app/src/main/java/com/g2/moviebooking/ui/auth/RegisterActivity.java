@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.StyleSpan;
+import android.text.method.PasswordTransformationMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
@@ -19,10 +20,12 @@ import com.g2.moviebooking.data.repository.AuthRepository;
 import com.google.firebase.auth.FirebaseUser;
 
 public class RegisterActivity extends AppCompatActivity {
-    private EditText etEmail, etPassword, etConfirmPassword;
+    private EditText etName, etEmail, etPassword, etConfirmPassword;
     private Button btnRegister;
     private TextView tvLogin;
     private AuthRepository authRepository;
+    private boolean isPasswordVisible = false;
+    private boolean isConfirmPasswordVisible = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,13 +38,13 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     private void setupViews() {
+        etName = findViewById(R.id.et_name);
         etEmail = findViewById(R.id.et_email);
         etPassword = findViewById(R.id.et_password);
         etConfirmPassword = findViewById(R.id.et_confirm_password);
         btnRegister = findViewById(R.id.btn_register);
         tvLogin = findViewById(R.id.tv_login);
 
-        // Định dạng text "Đăng nhập ngay" thành đậm
         String text = "Đã có tài khoản? Đăng nhập ngay";
         SpannableString spannable = new SpannableString(text);
         spannable.setSpan(new StyleSpan(Typeface.BOLD), text.indexOf("Đăng nhập ngay"), text.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
@@ -66,12 +69,13 @@ public class RegisterActivity extends AppCompatActivity {
 
     private void setupListeners() {
         btnRegister.setOnClickListener(v -> {
+            String name = etName.getText().toString().trim();
             String email = etEmail.getText().toString().trim();
             String password = etPassword.getText().toString().trim();
             String confirmPassword = etConfirmPassword.getText().toString().trim();
 
-            if (validateInput(email, password, confirmPassword)) {
-                registerWithEmail(email, password);
+            if (validateInput(name, email, password, confirmPassword)) {
+                registerWithEmail(name, email, password);
             }
         });
 
@@ -79,11 +83,60 @@ public class RegisterActivity extends AppCompatActivity {
             startActivity(new Intent(this, LoginActivity.class));
             finish();
         });
+
+        etPassword.setOnTouchListener((v, event) -> {
+            if (event.getAction() == android.view.MotionEvent.ACTION_UP) {
+                if (event.getRawX() >= (etPassword.getRight() - etPassword.getCompoundDrawables()[2].getBounds().width())) {
+                    togglePasswordVisibility();
+                    return true;
+                }
+            }
+            return false;
+        });
+
+        etConfirmPassword.setOnTouchListener((v, event) -> {
+            if (event.getAction() == android.view.MotionEvent.ACTION_UP) {
+                if (event.getRawX() >= (etConfirmPassword.getRight() - etConfirmPassword.getCompoundDrawables()[2].getBounds().width())) {
+                    toggleConfirmPasswordVisibility();
+                    return true;
+                }
+            }
+            return false;
+        });
     }
 
-    private boolean validateInput(String email, String password, String confirmPassword) {
-        if (email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
+    private void togglePasswordVisibility() {
+        if (isPasswordVisible) {
+            etPassword.setTransformationMethod(PasswordTransformationMethod.getInstance());
+            etPassword.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_eye, 0);
+        } else {
+            etPassword.setTransformationMethod(null);
+            etPassword.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_eye, 0);
+        }
+        isPasswordVisible = !isPasswordVisible;
+        etPassword.setSelection(etPassword.getText().length());
+    }
+
+    private void toggleConfirmPasswordVisibility() {
+        if (isConfirmPasswordVisible) {
+            etConfirmPassword.setTransformationMethod(PasswordTransformationMethod.getInstance());
+            etConfirmPassword.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_eye, 0);
+        } else {
+            etConfirmPassword.setTransformationMethod(null);
+            etConfirmPassword.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_eye, 0);
+        }
+        isConfirmPasswordVisible = !isConfirmPasswordVisible;
+        etConfirmPassword.setSelection(etConfirmPassword.getText().length());
+    }
+
+    private boolean validateInput(String name, String email, String password, String confirmPassword) {
+        if (name.isEmpty() || email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
             showCustomToast("Vui lòng điền đầy đủ thông tin", false);
+            return false;
+        }
+
+        if (name.length() < 2) {
+            showCustomToast("Tên phải dài ít nhất 2 ký tự", false);
             return false;
         }
 
@@ -105,8 +158,8 @@ public class RegisterActivity extends AppCompatActivity {
         return true;
     }
 
-    private void registerWithEmail(String email, String password) {
-        authRepository.registerWithEmail(email, password, new AuthRepository.AuthCallback() {
+    private void registerWithEmail(String name, String email, String password) {
+        authRepository.registerWithEmail(email, password, name, new AuthRepository.AuthCallback() {
             @Override
             public void onSuccess(FirebaseUser user) {
                 showCustomToast("Đăng ký thành công!", true);

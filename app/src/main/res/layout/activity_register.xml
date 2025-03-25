@@ -27,6 +27,19 @@
         android:gravity="center"
         android:layout_marginTop="16dp" />
 
+    <!-- Name -->
+    <EditText
+        android:id="@+id/et_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Họ và tên"
+        android:inputType="textPersonName"
+        android:background="@drawable/edittext_background"
+        android:textColor="@color/pink_dark"
+        android:textColorHint="@color/pink_light"
+        android:padding="12dp"
+        android:layout_marginTop="16dp" />
+
     <!-- Email -->
     <EditText
         android:id="@+id/et_email"
@@ -38,7 +51,7 @@
         android:textColor="@color/pink_dark"
         android:textColorHint="@color/pink_light"
         android:padding="12dp"
-        android:layout_marginTop="16dp" />
+        android:layout_marginTop="8dp" />
 
     <!-- Mật khẩu -->
     <EditText
@@ -51,7 +64,9 @@
         android:textColor="@color/pink_dark"
         android:textColorHint="@color/pink_light"
         android:padding="12dp"
-        android:layout_marginTop="8dp" />
+        android:layout_marginTop="8dp"
+        android:drawableEnd="@drawable/ic_eye"
+        android:drawableTint="@color/pink_dark"/>
 
     <!-- Xác nhận mật khẩu -->
     <EditText
@@ -64,7 +79,9 @@
         android:textColor="@color/pink_dark"
         android:textColorHint="@color/pink_light"
         android:padding="12dp"
-        android:layout_marginTop="8dp" />
+        android:layout_marginTop="8dp"
+        android:drawableEnd="@drawable/ic_eye"
+        android:drawableTint="@color/pink_dark"/>
 
     <!-- Nút Đăng Ký -->
     <Button

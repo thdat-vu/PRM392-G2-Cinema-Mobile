@@ -26,7 +26,7 @@ public class AuthRepository {
                     if (task.isSuccessful()) {
                         FirebaseUser user = auth.getCurrentUser();
                         if (user != null) {
-                            saveUserToFirestore(user, callback);
+                            saveUserToFirestore(user, user.getDisplayName(), callback);
                         } else {
                             callback.onFailure("Không thể lấy thông tin người dùng");
                         }
@@ -43,7 +43,7 @@ public class AuthRepository {
                     if (task.isSuccessful()) {
                         FirebaseUser user = auth.getCurrentUser();
                         if (user != null) {
-                            saveUserToFirestore(user, callback);
+                            saveUserToFirestore(user, user.getDisplayName(), callback);
                         } else {
                             callback.onFailure("Không thể lấy thông tin người dùng");
                         }
@@ -53,14 +53,14 @@ public class AuthRepository {
                 });
     }
 
-    // Đăng ký bằng email và mật khẩu
-    public void registerWithEmail(String email, String password, AuthCallback callback) {
+    // Đăng ký bằng email và mật khẩu với name
+    public void registerWithEmail(String email, String password, String name, AuthCallback callback) {
         auth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         FirebaseUser user = auth.getCurrentUser();
                         if (user != null) {
-                            saveUserToFirestore(user, callback);
+                            saveUserToFirestore(user, name, callback);
                         } else {
                             callback.onFailure("Không thể lấy thông tin người dùng");
                         }
@@ -70,9 +70,9 @@ public class AuthRepository {
                 });
     }
 
-    // Helper method để lưu thông tin user vào Firestore
-    private void saveUserToFirestore(FirebaseUser user, AuthCallback callback) {
-        User newUser = new User(user.getDisplayName(), user.getEmail());
+    // Helper method để lưu thông tin user vào Firestore với name
+    private void saveUserToFirestore(FirebaseUser user, String name, AuthCallback callback) {
+        User newUser = new User(name, user.getEmail());
         db.collection("users").document(user.getUid())
                 .set(newUser)
                 .addOnCompleteListener(setTask -> {
