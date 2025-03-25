@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="24dp"
+    android:gravity="center_horizontal">
+
+    <!-- Logo -->
+    <ImageView
+        android:id="@+id/logo"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:contentDescription="App Logo"
+        android:src="@drawable/ic_cinema_logo" />
+
+    <!-- Welcome Text -->
+    <TextView
+        android:id="@+id/tv_welcome"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Đăng ký tài khoản mới"
+        android:textAppearance="?android:textAppearanceMedium"
+        android:textColor="@color/pink_dark"
+        android:textStyle="bold"
+        android:fontFamily="sans-serif-medium"
+        android:gravity="center"
+        android:layout_marginTop="16dp" />
+
+    <!-- Email -->
+    <EditText
+        android:id="@+id/et_email"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Email"
+        android:inputType="textEmailAddress"
+        android:background="@drawable/edittext_background"
+        android:textColor="@color/pink_dark"
+        android:textColorHint="@color/pink_light"
+        android:padding="12dp"
+        android:layout_marginTop="16dp" />
+
+    <!-- Mật khẩu -->
+    <EditText
+        android:id="@+id/et_password"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Mật khẩu"
+        android:inputType="textPassword"
+        android:background="@drawable/edittext_background"
+        android:textColor="@color/pink_dark"
+        android:textColorHint="@color/pink_light"
+        android:padding="12dp"
+        android:layout_marginTop="8dp" />
+
+    <!-- Xác nhận mật khẩu -->
+    <EditText
+        android:id="@+id/et_confirm_password"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Xác nhận mật khẩu"
+        android:inputType="textPassword"
+        android:background="@drawable/edittext_background"
+        android:textColor="@color/pink_dark"
+        android:textColorHint="@color/pink_light"
+        android:padding="12dp"
+        android:layout_marginTop="8dp" />
+
+    <!-- Nút Đăng Ký -->
+    <Button
+        android:id="@+id/btn_register"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Đăng ký"
+        android:backgroundTint="@color/pink"
+        android:textColor="@android:color/white"
+        android:textAllCaps="false"
+        android:layout_marginTop="16dp" />
+
+    <!-- Link quay lại đăng nhập -->
+    <TextView
+        android:id="@+id/tv_login"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Đã có tài khoản? Đăng nhập ngay"
+        android:textAppearance="?android:textAppearanceSmall"
+        android:textColor="@color/pink_dark"
+        android:fontFamily="sans-serif-medium"
+        android:gravity="center"
+        android:layout_marginTop="16dp" />
+</LinearLayout>
