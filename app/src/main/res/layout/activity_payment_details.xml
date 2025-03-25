@@ -5,7 +5,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    >
+    android:background="#FFE0EE">
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar"
@@ -20,311 +20,317 @@
         app:title="Thông tin thanh toán"
         app:titleTextColor="@color/white" />
 
-
-    <LinearLayout
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="606dp"
-        android:background="#FFE0EE"
-        android:orientation="vertical"
-        android:padding="16dp"
+        android:layout_height="0dp"
+        android:isScrollContainer="true"
+        android:scrollbarThumbVertical="@color/white"
         app:layout_constraintBottom_toTopOf="@+id/linearLayout3"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar">
-
-        <TextView
-            android:id="@+id/textView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="12dp"
-            android:text="Thông tin đặt vé"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/toolbar" />
-
-        <!-- View with border and shadow -->
-        <!-- Ticket info card -->
-        <androidx.cardview.widget.CardView
-            android:id="@+id/cardView"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar"
+        app:layout_constraintVertical_bias="0.0">
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="184dp"
-            android:layout_marginTop="20dp"
-            android:orientation="horizontal"
-            app:cardCornerRadius="10dp"
-            app:cardElevation="8dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView">
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
 
-            <LinearLayout
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="12dp"
+                android:text="Thông tin đặt vé"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/toolbar" />
+
+            <!-- View with border and shadow -->
+            <!-- Ticket info card -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardView"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_height="184dp"
+                android:layout_marginTop="20dp"
                 android:orientation="horizontal"
-                android:padding="10dp">
-
-                <ImageView
-                    android:id="@+id/imgFilm"
-                    android:layout_width="200dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:scaleType="centerCrop"
-                    tools:srcCompat="@drawable/placeholder_poster" />
+                app:cardCornerRadius="10dp"
+                app:cardElevation="8dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textView">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_marginStart="8dp"
-                    android:layout_weight="1"
-                    android:gravity="fill_vertical"
-                    android:orientation="vertical">
+                    android:orientation="horizontal"
+                    android:padding="10dp">
 
-                    <!-- Row with rating badge + cinema name -->
+                    <ImageView
+                        android:id="@+id/imgFilm"
+                        android:layout_width="200dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:scaleType="centerCrop"
+                        tools:srcCompat="@drawable/placeholder_poster" />
+
                     <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
+                        android:layout_height="match_parent"
+                        android:layout_marginStart="8dp"
+                        android:layout_weight="1"
+                        android:gravity="fill_vertical"
+                        android:orientation="vertical">
 
-                        <!-- Rating badge -->
+                        <!-- Row with rating badge + cinema name -->
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+
+                            <!-- Rating badge -->
+                            <TextView
+                                android:id="@+id/tvLogo"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:background="@drawable/circle_background"
+                                android:paddingHorizontal="6dp"
+                                android:paddingVertical="2dp"
+                                android:text="16+"
+                                android:textColor="@android:color/white"
+                                android:textSize="12sp"
+                                android:textStyle="bold" />
+
+                            <!-- Cinema name -->
+                            <TextView
+                                android:id="@+id/tvCinemaName"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="8dp"
+                                android:text="CGV Hoàng Văn Thụ"
+                                android:textColor="#333333"
+                                android:textSize="12sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+
+                        <!-- Movie title -->
                         <TextView
-                            android:id="@+id/tvLogo"
+                            android:id="@+id/tvFilmName"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:background="@drawable/circle_background"
-                            android:paddingHorizontal="6dp"
-                            android:paddingVertical="2dp"
-                            android:text="16+"
-                            android:textColor="@android:color/white"
+                            android:layout_marginTop="4dp"
+                            android:text="Sát Thủ Vô Cùng Cực Hài"
+                            android:textColor="#000000"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                        <!-- Movie description or rating note -->
+                        <TextView
+                            android:id="@+id/tvDescription"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="Description:"
+                            android:textColor="#373535"
                             android:textSize="12sp"
                             android:textStyle="bold" />
 
-                        <!-- Cinema name -->
                         <TextView
-                            android:id="@+id/tvCinemaName"
-                            android:layout_width="wrap_content"
+                            android:id="@+id/tvMovieDescription"
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginStart="8dp"
-                            android:text="CGV Hoàng Văn Thụ"
-                            android:textColor="#333333"
-                            android:textSize="12sp"
-                            android:textStyle="bold" />
+                            android:layout_marginTop="2dp"
+                            android:paddingHorizontal="8dp"
+                            android:text="Phim được phổ biến đến người xem từ đủ 16 tuổi trở lên"
+                            android:textColor="#666666"
+                            android:textSize="12sp" />
                     </LinearLayout>
 
-                    <!-- Movie title -->
-                    <TextView
-                        android:id="@+id/tvFilmName"
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/filmDetail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                app:cardCornerRadius="10dp"
+                app:cardElevation="8dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.454"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/cardView">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="10dp"
+                    android:layout_marginVertical="10dp"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="Sát Thủ Vô Cùng Cực Hài"
-                        android:textColor="#000000"
-                        android:textSize="16sp"
-                        android:textStyle="bold" />
-
-                    <!-- Movie description or rating note -->
-                    <TextView
-                        android:id="@+id/tvDescription"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="Description:"
-                        android:textColor="#373535"
-                        android:textSize="12sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/tvMovieDescription"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
-                        android:paddingHorizontal="8dp"
-                        android:text="Phim được phổ biến đến người xem từ đủ 16 tuổi trở lên"
-                        android:textColor="#666666"
-                        android:textSize="12sp" />
-                </LinearLayout>
-
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
-
-        <androidx.cardview.widget.CardView
-            android:id="@+id/filmDetail"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            app:cardCornerRadius="10dp"
-            app:cardElevation="8dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.454"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/cardView">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="10dp"
-                android:layout_marginVertical="10dp"
-                android:orientation="horizontal">
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical">
-
-                    <LinearLayout
-                        android:layout_width="174dp"
                         android:layout_height="match_parent"
-                        android:layout_weight="1"
                         android:orientation="vertical">
 
-                        <TextView
-                            android:id="@+id/textView29"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="4dp"
+                        <LinearLayout
+                            android:layout_width="174dp"
+                            android:layout_height="match_parent"
                             android:layout_weight="1"
-                            android:text="Thời gian:"
-                            android:textColor="#666666"
-                            android:textStyle="bold" />
+                            android:orientation="vertical">
 
-                        <TextView
-                            android:id="@+id/tvShowtime"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="13h00 ~ 15h00,
+                            <TextView
+                                android:id="@+id/textView29"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="4dp"
+                                android:layout_weight="1"
+                                android:text="Thời gian:"
+                                android:textColor="#666666"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/tvShowtime"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="13h00 ~ 15h00,
                         Thứ 7  15/3/2025"
-                            android:textColor="#D99616"
-                            android:textSize="16sp" />
-                    </LinearLayout>
+                                android:textColor="#D99616"
+                                android:textSize="16sp" />
+                        </LinearLayout>
 
-                    <LinearLayout
-                        android:layout_width="174dp"
-                        android:layout_height="match_parent"
-                        android:layout_marginTop="10dp"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="4dp"
+                        <LinearLayout
+                            android:layout_width="174dp"
+                            android:layout_height="match_parent"
+                            android:layout_marginTop="10dp"
                             android:layout_weight="1"
-                            android:text="Phòng chiếu"
-                            android:textColor="#666666"
-                            android:textStyle="bold" />
+                            android:orientation="vertical">
 
-                        <TextView
-                            android:id="@+id/tvScreen"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="Tên Phòng Chiếu"
-                            android:textColor="#000000"
-                            android:textSize="16sp"
-                            android:textStyle="bold" />
-                    </LinearLayout>
-                </LinearLayout>
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="4dp"
+                                android:layout_weight="1"
+                                android:text="Phòng chiếu"
+                                android:textColor="#666666"
+                                android:textStyle="bold" />
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginStart="20dp"
-                    android:orientation="vertical">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:id="@+id/textView24"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="Định dạng"
-                            android:textColor="#666666"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/tvFormat"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:text="2D"
-                            android:textColor="#D99616"
-                            android:textSize="16sp" />
+                            <TextView
+                                android:id="@+id/tvScreen"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="Tên Phòng Chiếu"
+                                android:textColor="#000000"
+                                android:textSize="16sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
                     </LinearLayout>
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:layout_marginTop="10dp"
-                        android:layout_weight="1"
+                        android:layout_marginStart="20dp"
                         android:orientation="vertical">
 
-                        <TextView
-                            android:id="@+id/textView21"
+                        <LinearLayout
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="4dp"
-                            android:text="Số ghế"
-                            android:textColor="#666666"
-                            android:textStyle="bold" />
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
 
-                        <TextView
-                            android:id="@+id/tvSelectedSeatsText"
+                            <TextView
+                                android:id="@+id/textView24"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="Định dạng"
+                                android:textColor="#666666"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/tvFormat"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_weight="1"
+                                android:text="2D"
+                                android:textColor="#D99616"
+                                android:textSize="16sp" />
+                        </LinearLayout>
+
+                        <LinearLayout
                             android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:lineSpacingExtra="2dp"
-                            android:maxLines="6"
-                            android:paddingBottom="4dp"
-                            android:text="C7, C8, C9"
-                            android:textColor="#000000"
-                            android:textSize="16sp"
-                            android:textStyle="bold" />
+                            android:layout_height="match_parent"
+                            android:layout_marginTop="10dp"
+                            android:layout_weight="1"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/textView21"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginBottom="4dp"
+                                android:text="Số ghế"
+                                android:textColor="#666666"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/tvSelectedSeatsText"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:lineSpacingExtra="2dp"
+                                android:maxLines="6"
+                                android:paddingBottom="4dp"
+                                android:text="C7, C8, C9"
+                                android:textColor="#000000"
+                                android:textSize="16sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
                     </LinearLayout>
                 </LinearLayout>
-            </LinearLayout>
 
-        </androidx.cardview.widget.CardView>
+            </androidx.cardview.widget.CardView>
 
-        <TextView
-            android:id="@+id/tvComboName"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="16dp"
-            android:text="Combo bắp nước"
-            android:textAlignment="center"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/filmDetail" />
-        <!--  Combo food card         -->
-        <androidx.cardview.widget.CardView
-            android:id="@+id/tvComboSection"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            app:cardCornerRadius="10dp"
-            app:cardElevation="8dp"
-            app:layout_constraintBottom_toTopOf="@+id/linearLayout3"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.454"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tvComboName">
-            <!-- RecyclerView for combos -->
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvCombos"
+            <TextView
+                android:id="@+id/tvComboName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:text="Combo bắp nước"
+                android:textAlignment="center"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/filmDetail" />
+            <!--  Combo food card         -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/tvComboSection"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="8dp"
-                android:nestedScrollingEnabled="false"
-                android:padding="4dp" />
-        </androidx.cardview.widget.CardView>
-    </LinearLayout>
+                android:layout_marginTop="4dp"
+                app:cardCornerRadius="10dp"
+                app:cardElevation="8dp"
+                app:layout_constraintBottom_toTopOf="@+id/linearLayout3"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.454"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tvComboName">
+                <!-- RecyclerView for combos -->
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvCombos"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    android:padding="4dp" />
+            </androidx.cardview.widget.CardView>
+        </LinearLayout>
+    </ScrollView>
+
 
     <LinearLayout
         android:id="@+id/linearLayout3"
