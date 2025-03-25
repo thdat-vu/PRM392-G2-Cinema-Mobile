@@ -51,8 +51,15 @@ public class TheatreAdapter extends RecyclerView.Adapter<TheatreAdapter.TheatreV
             holder.tvNearYou.setVisibility(View.GONE);
         }*/
 
-        // Example of setting format text if you want
-        holder.tvFormatLabel.setText("2D Phụ đề");
+        String format = showtimes.stream().findFirst().map(showtime -> showtime.getFormat()).get();
+        if (format != null){
+            holder.tvFormatLabel.setText(format);
+        }
+        else {
+            // Example of setting format text if you want
+            holder.tvFormatLabel.setText("2D Phụ đề");
+        }
+
 
         // Set up the inner RecyclerView with showtimes
         ShowtimesAdapter showtimesAdapter = new ShowtimesAdapter(
