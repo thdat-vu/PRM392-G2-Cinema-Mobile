@@ -18,6 +18,7 @@ import com.g2.moviebooking.data.repository.MovieRepository;
 import com.g2.moviebooking.data.repository.ShowtimeRepository;
 import com.g2.moviebooking.data.repository.TheatreRepository;
 import com.g2.moviebooking.ui.MovieListActivity;
+import com.g2.moviebooking.ui.ProfileActivity;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -83,7 +84,8 @@ public class TicketsActivity extends AppCompatActivity {
             } else if (itemId == R.id.nav_tickets) {
                 return true;
             } else if (itemId == R.id.nav_profile) {
-                showToast("Chức năng tài khoản chưa được triển khai");
+                startActivity(new Intent(this, ProfileActivity.class));
+                finish();
                 return true;
             }
             return false;
