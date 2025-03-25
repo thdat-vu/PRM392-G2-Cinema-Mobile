@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -19,8 +20,9 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 public class ProfileActivity extends AppCompatActivity {
-    private TextView tvName, tvEmail, tvPhone;
-    private Button btnLogout;
+    private TextView tvGreeting, tvEmail;
+    private EditText etName, etPhone;
+    private Button btnUpdate, btnLogout;
     private FirebaseAuth auth;
     private FirebaseFirestore db;
 
@@ -39,9 +41,11 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void setupViews() {
-        tvName = findViewById(R.id.tv_name);
+        tvGreeting = findViewById(R.id.tv_greeting);
         tvEmail = findViewById(R.id.tv_email);
-        tvPhone = findViewById(R.id.tv_phone);
+        etName = findViewById(R.id.et_name);
+        etPhone = findViewById(R.id.et_phone);
+        btnUpdate = findViewById(R.id.btn_update);
         btnLogout = findViewById(R.id.btn_logout);
     }
 
@@ -61,6 +65,7 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
     private void setupListeners() {
+        btnUpdate.setOnClickListener(v -> updateUserInfo());
         btnLogout.setOnClickListener(v -> logout());
     }
 
@@ -79,8 +84,11 @@ public class ProfileActivity extends AppCompatActivity {
                             if (document.exists()) {
                                 String name = document.getString("name");
                                 String phone = document.getString("phone");
-                                tvName.setText(name != null ? name : "Chưa cập nhật");
-                                tvPhone.setText(phone != null ? phone : "Chưa cập nhật");
+
+                                // Cập nhật lời chào với tên người dùng
+                                tvGreeting.setText("Chào " + (name != null ? name : "Chưa cập nhật"));
+                                etName.setText(name != null ? name : "Chưa cập nhật");
+                                etPhone.setText(phone != null ? phone : "Chưa cập nhật");
                             }
                         } else {
                             showCustomToast("Không thể tải thông tin: " + task.getException().getMessage(), false);
@@ -90,6 +98,56 @@ public class ProfileActivity extends AppCompatActivity {
             startActivity(new Intent(this, LoginActivity.class));
             finish();
         }
+    }
+
+    private void updateUserInfo() {
+        FirebaseUser currentUser = auth.getCurrentUser();
+        if (currentUser == null) {
+            showCustomToast("Vui lòng đăng nhập lại", false);
+            startActivity(new Intent(this, LoginActivity.class));
+            finish();
+            return;
+        }
+
+        String newName = etName.getText().toString().trim();
+        String newPhone = etPhone.getText().toString().trim();
+
+        // Validate input
+        if (newName.isEmpty()) {
+            showCustomToast("Tên không được để trống", false);
+            return;
+        }
+        if (newPhone.isEmpty()) {
+            showCustomToast("Số điện thoại không được để trống", false);
+            return;
+        }
+        if (!android.util.Patterns.PHONE.matcher(newPhone).matches() || newPhone.length() < 10) {
+            showCustomToast("Số điện thoại không hợp lệ (ít nhất 10 số)", false);
+            return;
+        }
+
+        // Cập nhật Firestore
+        db.collection("users")
+                .document(currentUser.getUid())
+                .update("name", newName, "phone", newPhone)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        showCustomToast("Cập nhật thông tin thành công", true);
+                        tvGreeting.setText("Chào " + newName); // Cập nhật lời chào
+                    } else {
+                        showCustomToast("Cập nhật thất bại: " + task.getException().getMessage(), false);
+                    }
+                });
+
+        // Cập nhật displayName trong FirebaseAuth
+        currentUser.updateProfile(new com.google.firebase.auth.UserProfileChangeRequest.Builder()
+                        .setDisplayName(newName)
+                        .build())
+                .addOnCompleteListener(task -> {
+                    if (!task.isSuccessful()) {
+                        showCustomToast("Cập nhật tên trên FirebaseAuth thất bại: " + task.getException().getMessage(), false);
+                    }
+                });
     }
 
     private void logout() {
