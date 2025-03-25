@@ -1,9 +1,11 @@
 package com.g2.moviebooking.data.repository;
 
 import com.g2.moviebooking.data.model.Booking;
+import com.g2.moviebooking.data.model.Showtime;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 
+import java.util.Date;
 import java.util.List;
 
 public class BookingRepository {
@@ -25,6 +27,95 @@ public class BookingRepository {
                         bookings.get(i).setId(querySnapshot.getDocuments().get(i).getId());
                     }
                     callback.onSuccess(bookings);
+                })
+                .addOnFailureListener(e -> callback.onFailure(e.getMessage()));
+    }
+
+    // Tạo booking mới với đầy đủ thông tin
+    public void createBooking(String userId, String showtimeId, List<String> selectedSeats,
+                              List<Booking.FoodItem> foodItems, String paymentMethod,
+                              BookingCallback<Booking> callback) {
+        // Tạo bookingCode ngẫu nhiên
+        String bookingCode = "BK" + System.currentTimeMillis();
+        Date bookingDate = new Date();
+
+        // Lấy thông tin showtime để tính totalAmount
+        db.collection("showtimes_refactored").document(showtimeId)
+                .get()
+                .addOnSuccessListener(doc -> {
+                    Showtime showtime = doc.toObject(Showtime.class);
+                    if (showtime != null) {
+                        showtime.setId(doc.getId());
+
+                        // Tính totalAmount
+                        double seatPrice = showtime.getPrice() * selectedSeats.size();
+                        double foodPrice = foodItems != null ?
+                                foodItems.stream().mapToDouble(item -> item.getPrice() * item.getQuantity()).sum() : 0;
+                        double totalAmount = seatPrice + foodPrice;
+
+                        // Tạo booking object
+                        Booking booking = new Booking(
+                                null, // id sẽ được Firestore tạo tự động
+                                userId,
+                                showtimeId,
+                                showtime,
+                                selectedSeats,
+                                totalAmount,
+                                bookingCode,
+                                bookingDate,
+                                paymentMethod,
+                                "PENDING", // paymentStatus ban đầu
+                                null, // transactionId
+                                null, // transactionTime
+                                "PENDING", // status ban đầu
+                                foodItems
+                        );
+
+                        // Thêm vào Firestore
+                        db.collection("bookings_refactored")
+                                .add(booking)
+                                .addOnSuccessListener(documentReference -> {
+                                    booking.setId(documentReference.getId());
+                                    callback.onSuccess(booking);
+                                })
+                                .addOnFailureListener(e -> callback.onFailure(e.getMessage()));
+                    } else {
+                        callback.onFailure("Showtime not found");
+                    }
+                })
+                .addOnFailureListener(e -> callback.onFailure(e.getMessage()));
+    }
+
+    // Cập nhật trạng thái thanh toán sau khi hoàn tất
+    public void confirmPayment(String bookingId, String transactionId,
+                               BookingCallback<Booking> callback) {
+        Date transactionTime = new Date();
+        db.collection("bookings_refactored").document(bookingId)
+                .get()
+                .addOnSuccessListener(doc -> {
+                    Booking booking = doc.toObject(Booking.class);
+                    if (booking != null) {
+                        booking.setId(doc.getId());
+
+                        // Cập nhật thông tin thanh toán
+                        db.collection("bookings_refactored").document(bookingId)
+                                .update(
+                                        "paymentStatus", "PAID",
+                                        "transactionId", transactionId,
+                                        "transactionTime", transactionTime,
+                                        "status", "CONFIRMED"
+                                )
+                                .addOnSuccessListener(aVoid -> {
+                                    booking.setPaymentStatus("PAID");
+                                    booking.setTransactionId(transactionId);
+                                    booking.setTransactionTime(transactionTime);
+                                    booking.setStatus("CONFIRMED");
+                                    callback.onSuccess(booking);
+                                })
+                                .addOnFailureListener(e -> callback.onFailure(e.getMessage()));
+                    } else {
+                        callback.onFailure("Booking not found");
+                    }
                 })
                 .addOnFailureListener(e -> callback.onFailure(e.getMessage()));
     }
