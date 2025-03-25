@@ -67,7 +67,7 @@ public class FoodDrinksActivity extends AppCompatActivity implements FoodDrinkAd
             movieId = intent.getStringExtra("movieId");
             showtime = (Showtime) intent.getSerializableExtra(Constants.EXTRA_SHOWTIME);
             selectedSeats = intent.getStringArrayExtra(Constants.EXTRA_SELECTED_SEATS);
-            ticketPrice = intent.getDoubleExtra("ticketPrice", 0);
+            ticketPrice = intent.getDoubleExtra(Constants.EXTRA_TOTAL_AMOUNT, 0);
         }
         
         // Set up RecyclerView
