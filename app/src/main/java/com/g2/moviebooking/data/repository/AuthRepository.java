@@ -29,7 +29,7 @@ public class AuthRepository {
                     if (task.isSuccessful()) {
                         FirebaseUser user = auth.getCurrentUser();
                         if (user != null) {
-                            saveUserToFirestore(user, user.getDisplayName(), callback);
+                            saveUserToFirestore(user, user.getDisplayName(), null, callback); // Phone là null với Google
                         } else {
                             callback.onFailure("Không thể lấy thông tin người dùng");
                         }
@@ -46,7 +46,8 @@ public class AuthRepository {
                     if (task.isSuccessful()) {
                         FirebaseUser user = auth.getCurrentUser();
                         if (user != null) {
-                            saveUserToFirestore(user, user.getDisplayName(), callback);
+                            // Không ghi đè Firestore, chỉ trả về user
+                            callback.onSuccess(user);
                         } else {
                             callback.onFailure("Không thể lấy thông tin người dùng");
                         }
@@ -56,26 +57,35 @@ public class AuthRepository {
                 });
     }
 
-    // Đăng ký bằng email và mật khẩu với name
-    public void registerWithEmail(String email, String password, String name, AuthCallback callback) {
-        auth.createUserWithEmailAndPassword(email, password)
+    // Đăng ký bằng email và mật khẩu với name và phone
+    public void registerWithEmail(String email, String password, String name, String phone, AuthCallback callback) {
+        db.collection("users")
+                .whereEqualTo("email", email)
+                .get()
                 .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        FirebaseUser user = auth.getCurrentUser();
-                        if (user != null) {
-                            Log.d(TAG, "Registering user with name: " + name);
-                            updateUserProfileAndFirestore(user, name, callback);
-                        } else {
-                            callback.onFailure("Không thể lấy thông tin người dùng");
-                        }
+                    if (task.isSuccessful() && !task.getResult().isEmpty()) {
+                        callback.onFailure("Email đã được sử dụng");
                     } else {
-                        callback.onFailure(task.getException().getMessage());
+                        auth.createUserWithEmailAndPassword(email, password)
+                                .addOnCompleteListener(authTask -> {
+                                    if (authTask.isSuccessful()) {
+                                        FirebaseUser user = auth.getCurrentUser();
+                                        if (user != null) {
+                                            Log.d(TAG, "Registering user with name: " + name + ", phone: " + phone);
+                                            updateUserProfileAndFirestore(user, name, phone, callback);
+                                        } else {
+                                            callback.onFailure("Không thể lấy thông tin người dùng");
+                                        }
+                                    } else {
+                                        callback.onFailure(authTask.getException().getMessage());
+                                    }
+                                });
                     }
                 });
     }
 
-    // Helper method để cập nhật profile và lưu thông tin user vào Firestore
-    private void updateUserProfileAndFirestore(FirebaseUser user, String name, AuthCallback callback) {
+    // Cập nhật profile FirebaseAuth và lưu thông tin vào Firestore (dùng cho register)
+    private void updateUserProfileAndFirestore(FirebaseUser user, String name, String phone, AuthCallback callback) {
         UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
                 .setDisplayName(name)
                 .build();
@@ -83,12 +93,12 @@ public class AuthRepository {
         user.updateProfile(profileUpdates)
                 .addOnCompleteListener(profileTask -> {
                     if (profileTask.isSuccessful()) {
-                        User newUser = new User(name, user.getEmail());
+                        User newUser = new User(name, user.getEmail(), phone);
                         db.collection("users").document(user.getUid())
                                 .set(newUser)
                                 .addOnCompleteListener(setTask -> {
                                     if (setTask.isSuccessful()) {
-                                        Log.d(TAG, "User saved to Firestore with name: " + name);
+                                        Log.d(TAG, "User saved to Firestore with name: " + name + ", phone: " + phone);
                                         callback.onSuccess(user);
                                     } else {
                                         callback.onFailure("Lưu người dùng thất bại: " + setTask.getException().getMessage());
@@ -100,10 +110,10 @@ public class AuthRepository {
                 });
     }
 
-    // Helper method để lưu thông tin user vào Firestore (dùng cho login)
-    private void saveUserToFirestore(FirebaseUser user, String name, AuthCallback callback) {
+    // Lưu thông tin user vào Firestore (dùng cho Google login)
+    private void saveUserToFirestore(FirebaseUser user, String name, String phone, AuthCallback callback) {
         String displayName = (name != null && !name.isEmpty()) ? name : "Người dùng chưa đặt tên";
-        User newUser = new User(displayName, user.getEmail());
+        User newUser = new User(displayName, user.getEmail(), phone);
         db.collection("users").document(user.getUid())
                 .set(newUser)
                 .addOnCompleteListener(setTask -> {
@@ -115,7 +125,6 @@ public class AuthRepository {
                 });
     }
 
-    // Interface callback để xử lý kết quả
     public interface AuthCallback {
         void onSuccess(FirebaseUser user);
         void onFailure(String error);

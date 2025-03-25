@@ -63,7 +63,6 @@ public class LoginActivity extends AppCompatActivity {
     private void showCustomToast(String message, boolean isSuccess) {
         LayoutInflater inflater = getLayoutInflater();
         View layout = inflater.inflate(R.layout.custom_toast, findViewById(R.id.tv_toast_message));
-
         TextView textView = layout.findViewById(R.id.tv_toast_message);
         ImageView iconView = layout.findViewById(R.id.img_toast_icon);
 
@@ -76,7 +75,6 @@ public class LoginActivity extends AppCompatActivity {
         toast.show();
     }
 
-    // Trong phương thức setupListeners() của LoginActivity, thêm:
     private void setupListeners() {
         btnGoogleSignIn.setOnClickListener(v -> signInWithGoogle());
 

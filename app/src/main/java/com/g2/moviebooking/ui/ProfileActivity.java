@@ -19,7 +19,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 public class ProfileActivity extends AppCompatActivity {
-    private TextView tvName, tvEmail;
+    private TextView tvName, tvEmail, tvPhone;
     private Button btnLogout;
     private FirebaseAuth auth;
     private FirebaseFirestore db;
@@ -41,13 +41,13 @@ public class ProfileActivity extends AppCompatActivity {
     private void setupViews() {
         tvName = findViewById(R.id.tv_name);
         tvEmail = findViewById(R.id.tv_email);
+        tvPhone = findViewById(R.id.tv_phone);
         btnLogout = findViewById(R.id.btn_logout);
     }
 
     private void showCustomToast(String message, boolean isSuccess) {
         LayoutInflater inflater = getLayoutInflater();
         View layout = inflater.inflate(R.layout.custom_toast, findViewById(R.id.tv_toast_message));
-
         TextView textView = layout.findViewById(R.id.tv_toast_message);
         ImageView iconView = layout.findViewById(R.id.img_toast_icon);
 
@@ -69,7 +69,7 @@ public class ProfileActivity extends AppCompatActivity {
         if (currentUser != null) {
             tvEmail.setText(currentUser.getEmail());
 
-            // Lấy thông tin name từ Firestore
+            // Lấy thông tin từ Firestore
             db.collection("users")
                     .document(currentUser.getUid())
                     .get()
@@ -78,14 +78,15 @@ public class ProfileActivity extends AppCompatActivity {
                             DocumentSnapshot document = task.getResult();
                             if (document.exists()) {
                                 String name = document.getString("name");
+                                String phone = document.getString("phone");
                                 tvName.setText(name != null ? name : "Chưa cập nhật");
+                                tvPhone.setText(phone != null ? phone : "Chưa cập nhật");
                             }
                         } else {
                             showCustomToast("Không thể tải thông tin: " + task.getException().getMessage(), false);
                         }
                     });
         } else {
-            // Nếu không có user đăng nhập, quay về login
             startActivity(new Intent(this, LoginActivity.class));
             finish();
         }
@@ -95,7 +96,7 @@ public class ProfileActivity extends AppCompatActivity {
         auth.signOut();
         showCustomToast("Đã đăng xuất", true);
         startActivity(new Intent(this, LoginActivity.class));
-        finishAffinity(); // Đóng tất cả activities
+        finishAffinity();
     }
 
     private void setupBottomNavigation() {
@@ -112,13 +113,13 @@ public class ProfileActivity extends AppCompatActivity {
                 return true;
             } else if (itemId == R.id.nav_tickets) {
                 startActivity(new Intent(this, BookingHistoryListActivity.class));
+                finish();
                 return true;
             } else if (itemId == R.id.nav_profile) {
                 return true;
             }
-
             return false;
         });
-        bottomNavigationView.setSelectedItemId(R.id.nav_profile); // Default selection
+        bottomNavigationView.setSelectedItemId(R.id.nav_profile);
     }
 }

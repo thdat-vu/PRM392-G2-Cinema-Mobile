@@ -19,90 +19,103 @@
         android:id="@+id/tv_welcome"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:fontFamily="sans-serif-medium"
+        android:gravity="center"
         android:text="Đăng ký tài khoản mới"
         android:textAppearance="?android:textAppearanceMedium"
         android:textColor="@color/pink_dark"
-        android:textStyle="bold"
-        android:fontFamily="sans-serif-medium"
-        android:gravity="center"
-        android:layout_marginTop="16dp" />
+        android:textStyle="bold" />
 
     <!-- Name -->
     <EditText
         android:id="@+id/et_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/edittext_background"
         android:hint="Họ và tên"
         android:inputType="textPersonName"
-        android:background="@drawable/edittext_background"
-        android:textColor="@color/pink_dark"
-        android:textColorHint="@color/pink_light"
         android:padding="12dp"
-        android:layout_marginTop="16dp" />
+        android:textColor="@color/pink_dark"
+        android:textColorHint="@color/pink_light" />
 
     <!-- Email -->
     <EditText
         android:id="@+id/et_email"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/edittext_background"
         android:hint="Email"
         android:inputType="textEmailAddress"
-        android:background="@drawable/edittext_background"
-        android:textColor="@color/pink_dark"
-        android:textColorHint="@color/pink_light"
         android:padding="12dp"
-        android:layout_marginTop="8dp" />
+        android:textColor="@color/pink_dark"
+        android:textColorHint="@color/pink_light" />
 
-    <!-- Mật khẩu -->
+    <!-- Phone -->
+    <EditText
+        android:id="@+id/et_phone"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/edittext_background"
+        android:hint="Số điện thoại"
+        android:inputType="phone"
+        android:padding="12dp"
+        android:textColor="@color/pink_dark"
+        android:textColorHint="@color/pink_light" />
+
+    <!-- Password -->
     <EditText
         android:id="@+id/et_password"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/edittext_background"
+        android:drawableEnd="@drawable/ic_eye"
+        android:drawableTint="@color/pink_dark"
         android:hint="Mật khẩu"
         android:inputType="textPassword"
-        android:background="@drawable/edittext_background"
-        android:textColor="@color/pink_dark"
-        android:textColorHint="@color/pink_light"
         android:padding="12dp"
-        android:layout_marginTop="8dp"
-        android:drawableEnd="@drawable/ic_eye"
-        android:drawableTint="@color/pink_dark"/>
+        android:textColor="@color/pink_dark"
+        android:textColorHint="@color/pink_light" />
 
-    <!-- Xác nhận mật khẩu -->
+    <!-- Confirm Password -->
     <EditText
         android:id="@+id/et_confirm_password"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/edittext_background"
+        android:drawableEnd="@drawable/ic_eye"
+        android:drawableTint="@color/pink_dark"
         android:hint="Xác nhận mật khẩu"
         android:inputType="textPassword"
-        android:background="@drawable/edittext_background"
-        android:textColor="@color/pink_dark"
-        android:textColorHint="@color/pink_light"
         android:padding="12dp"
-        android:layout_marginTop="8dp"
-        android:drawableEnd="@drawable/ic_eye"
-        android:drawableTint="@color/pink_dark"/>
+        android:textColor="@color/pink_dark"
+        android:textColorHint="@color/pink_light" />
 
-    <!-- Nút Đăng Ký -->
+    <!-- Register Button -->
     <Button
         android:id="@+id/btn_register"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Đăng ký"
+        android:layout_marginTop="16dp"
         android:backgroundTint="@color/pink"
-        android:textColor="@android:color/white"
+        android:text="Đăng ký"
         android:textAllCaps="false"
-        android:layout_marginTop="16dp" />
+        android:textColor="@android:color/white" />
 
-    <!-- Link quay lại đăng nhập -->
+    <!-- Login Link -->
     <TextView
         android:id="@+id/tv_login"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Đã có tài khoản? Đăng nhập ngay"
-        android:textAppearance="?android:textAppearanceSmall"
-        android:textColor="@color/pink_dark"
+        android:layout_marginTop="16dp"
         android:fontFamily="sans-serif-medium"
         android:gravity="center"
-        android:layout_marginTop="16dp" />
+        android:text="Đã có tài khoản? Đăng nhập ngay"
+        android:textAppearance="?android:textAppearanceSmall"
+        android:textColor="@color/pink_dark" />
 </LinearLayout>
