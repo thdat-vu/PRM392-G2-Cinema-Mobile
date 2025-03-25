@@ -15,7 +15,10 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import com.g2.moviebooking.adapter.DateAdapter;
 import com.g2.moviebooking.data.model.Movie;
 import com.g2.moviebooking.ui.bookings.SeatActivity;
 import com.g2.moviebooking.utils.Constants;
@@ -43,7 +46,7 @@ public class ShowtimeSelectionActivity extends AppCompatActivity {
     private static final String TAG = "ShowtimeSelectionActivity";
     private ImageView btnBack;
     private TextView tvMovieTitle;
-    private Spinner spinnerDates;
+    private RecyclerView recyclerDates;
     private ListView lvShowtimes;
     private String movieId;
     private String movieTitle;
@@ -77,7 +80,7 @@ public class ShowtimeSelectionActivity extends AppCompatActivity {
         // Initialize views
         btnBack = findViewById(R.id.btnBack);
         tvMovieTitle = findViewById(R.id.tv_movie_title);
-        spinnerDates = findViewById(R.id.spinner_dates);
+        recyclerDates = findViewById(R.id.recycler_dates);
         lvShowtimes = findViewById(R.id.lv_showtimes);
 
         // Set movie title
@@ -93,7 +96,7 @@ public class ShowtimeSelectionActivity extends AppCompatActivity {
         availableDates = generateDateList();
 
         // Setup UI
-        setupDateSpinner();
+        setupDateRecyclerView();
         setupShowtimesList();
 
         // Load all theatres upfront
@@ -105,42 +108,19 @@ public class ShowtimeSelectionActivity extends AppCompatActivity {
 
     private List<Date> generateDateList() {
         List<Date> dates = new ArrayList<>();
+        // Get current date in GMT+07:00 timezone
         Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("GMT+07:00"));
-        calendar.set(2025, Calendar.MARCH, 15); // Set to March 15, 2025
+        // Set to start of today
         calendar.set(Calendar.HOUR_OF_DAY, 0);
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
 
-        for (int i = 0; i < 7; i++) { // 7 days
+        for (int i = 0; i < 14; i++) { // Generate 14 days
             dates.add(calendar.getTime());
             calendar.add(Calendar.DAY_OF_MONTH, 1);
         }
         return dates;
-    }
-
-    private void setupDateSpinner() {
-        List<String> dateStrings = new ArrayList<>();
-        for (Date date : availableDates) {
-            dateStrings.add(dateFormat.format(date));
-        }
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
-                android.R.layout.simple_spinner_item, dateStrings);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerDates.setAdapter(adapter);
-
-        spinnerDates.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                Date selectedDate = availableDates.get(position);
-                Log.d(TAG, "Selected Date: " + dateFormat.format(selectedDate));
-                fetchShowtimesForDate(selectedDate);
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {}
-        });
     }
 
     private void loadTheatres() {
@@ -249,6 +229,25 @@ public class ShowtimeSelectionActivity extends AppCompatActivity {
             adapter.notifyDataSetChanged();
         } else {
             Log.e(TAG, "Adapter is null, cannot update showtimes list");
+        }
+    }
+    private void setupDateRecyclerView() {
+        // Create an adapter, pass in availableDates
+        DateAdapter dateAdapter = new DateAdapter(availableDates, new DateAdapter.OnDateClickListener() {
+            @Override
+            public void onDateClicked(Date date, int position) {
+                // Same logic as spinner onItemSelected
+                Log.d(TAG, "Clicked date: " + dateFormat.format(date));
+                fetchShowtimesForDate(date);
+            }
+        });
+
+        recyclerDates.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        recyclerDates.setAdapter(dateAdapter);
+
+        // Optionally, load showtimes for the first date immediately:
+        if (!availableDates.isEmpty()) {
+            fetchShowtimesForDate(availableDates.get(0));
         }
     }
 }

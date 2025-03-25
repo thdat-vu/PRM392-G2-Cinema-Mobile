@@ -1,0 +1,15 @@
+<!-- res/drawable/bg_container_selected.xml -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+
+    <!-- Transparent fill so you only see the stroke -->
+    <solid android:color="@android:color/transparent"/>
+
+    <!-- The border color and width -->
+    <stroke
+        android:width="2dp"
+        android:color="#E91E63" /> <!-- or any color you like -->
+
+    <!-- Rounded corners -->
+    <corners android:radius="12dp" />
+</shape>
