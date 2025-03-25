@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.g2.moviebooking.R;
 import com.g2.moviebooking.ui.auth.LoginActivity;
 import com.g2.moviebooking.ui.bookings.BookingHistoryListActivity;
+import com.g2.moviebooking.ui.tickets.TicketsActivity;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -170,7 +171,7 @@ public class ProfileActivity extends AppCompatActivity {
                 showCustomToast("Chức năng rạp chưa được triển khai", false);
                 return true;
             } else if (itemId == R.id.nav_tickets) {
-                startActivity(new Intent(this, BookingHistoryListActivity.class));
+                startActivity(new Intent(this, TicketsActivity.class));
                 finish();
                 return true;
             } else if (itemId == R.id.nav_profile) {
