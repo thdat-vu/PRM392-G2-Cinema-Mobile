@@ -140,6 +140,36 @@
 
     </LinearLayout>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="2"
+        android:paddingStart="24dp"
+        android:paddingBottom="12dp"
+        app:layout_constraintBottom_toTopOf="@+id/btnBuy">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="Tạm tính:"
+            android:layout_weight="1"
+            android:textStyle="bold"
+            android:textSize="20sp"
+            android:textColor="@color/black" />
+        <TextView
+            android:id="@+id/tvTempPrice"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="30.000"
+            android:layout_weight="1"
+            android:gravity="end"
+            android:textStyle="bold"
+            android:layout_marginEnd="24dp"
+            android:textSize="20sp"
+            android:textColor="@color/black" />
+    </LinearLayout>
+
     <Button
         android:id="@+id/btnBuy"
         android:layout_width="0dp"
