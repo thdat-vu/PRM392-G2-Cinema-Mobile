@@ -28,6 +28,7 @@ import com.g2.moviebooking.utils.Constants;
 
 import org.json.JSONObject;
 
+import java.io.Serializable;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -163,7 +164,14 @@ public class PaymentActivity extends AppCompatActivity {
         totalAmount = seatPrice + foodPrice;
 
         // Get list food items
-        foodItems = (ArrayList<FoodDrink>) intent.getSerializableExtra(Constants.EXTRA_FOOD_DRINKS_ITEMS);
+        Serializable extra = intent.getSerializableExtra(Constants.EXTRA_FOOD_DRINKS_ITEMS);
+
+        if (extra != null) {
+            foodItems = (ArrayList<FoodDrink>) extra;
+        } else {
+            // Handle the null case if needed
+            Log.e(TAG, "No food items were passed in the intent.");
+        }
 
         // Get selected seats
         selectedSeats = intent.getStringArrayExtra(Constants.EXTRA_SELECTED_SEATS);
