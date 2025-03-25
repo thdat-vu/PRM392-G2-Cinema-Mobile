@@ -1,0 +1,76 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="8dp">
+
+    <!-- Row with theatre logo, name, distance, etc. -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <!-- Optional logo -->
+        <ImageView
+            android:id="@+id/imgTheatreLogo"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/ic_cinestar_logo"
+            android:contentDescription="Theatre Logo" />
+
+        <!-- Theater name + distance in a vertical column -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:layout_marginStart="8dp">
+
+            <TextView
+                android:id="@+id/tvTheatreName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="CGV Hoàng Văn Thụ"
+                android:textStyle="bold"
+                android:textSize="16sp" />
+
+            <TextView
+                android:id="@+id/tvDistance"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0.3 km"
+                android:textSize="12sp" />
+
+        </LinearLayout>
+
+        <!-- "Bạn ở gần rạp này" if applicable -->
+        <TextView
+            android:id="@+id/tvNearYou"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Bạn ở gần rạp này"
+            android:visibility="gone"
+            android:textSize="12sp"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="8dp"
+            android:textColor="@android:color/holo_red_dark" />
+    </LinearLayout>
+
+    <!-- Format/language label, e.g. "2D phụ đề" -->
+    <TextView
+        android:id="@+id/tvFormatLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="2D Phụ đề"
+        android:textStyle="bold"
+        android:textSize="14sp"
+        android:layout_marginTop="8dp" />
+
+    <!-- Inner RecyclerView or layout for showtimes -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvShowtimes"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp" />
+
+</LinearLayout>

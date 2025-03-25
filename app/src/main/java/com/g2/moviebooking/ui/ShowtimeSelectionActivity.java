@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.g2.moviebooking.adapter.DateAdapter;
+import com.g2.moviebooking.adapter.TheatreAdapter;
 import com.g2.moviebooking.data.model.Movie;
 import com.g2.moviebooking.ui.bookings.SeatActivity;
 import com.g2.moviebooking.utils.Constants;
@@ -34,12 +35,15 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.TimeZone;
+import java.util.stream.Collectors;
 
 public class ShowtimeSelectionActivity extends AppCompatActivity {
 
@@ -47,7 +51,6 @@ public class ShowtimeSelectionActivity extends AppCompatActivity {
     private ImageView btnBack;
     private TextView tvMovieTitle;
     private RecyclerView recyclerDates;
-    private ListView lvShowtimes;
     private String movieId;
     private String movieTitle;
     private Movie movie;
@@ -58,6 +61,8 @@ public class ShowtimeSelectionActivity extends AppCompatActivity {
     private Map<String, Theatre> theatreMap; // Lưu trữ thông tin rạp theo theatreId
     private SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
     private SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
+    private RecyclerView rvTheatres;
+    private TheatreAdapter theatreAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,7 +86,7 @@ public class ShowtimeSelectionActivity extends AppCompatActivity {
         btnBack = findViewById(R.id.btnBack);
         tvMovieTitle = findViewById(R.id.tv_movie_title);
         recyclerDates = findViewById(R.id.recycler_dates);
-        lvShowtimes = findViewById(R.id.lv_showtimes);
+        rvTheatres = findViewById(R.id.rvTheatres);
 
         // Set movie title
         tvMovieTitle.setText(movieTitle);
@@ -95,13 +100,12 @@ public class ShowtimeSelectionActivity extends AppCompatActivity {
         showtimes = new ArrayList<>();
         availableDates = generateDateList();
 
-        // Setup UI
-        setupDateRecyclerView();
-        setupShowtimesList();
-
         // Load all theatres upfront
         loadTheatres();
 
+        // Setup UI
+        setupDateRecyclerView();
+        updateShowtimesList();
 
         btnBack.setOnClickListener(v -> onBackPressed());
     }
@@ -153,7 +157,7 @@ public class ShowtimeSelectionActivity extends AppCompatActivity {
 
         Log.d(TAG, "Querying showtimes for movieId: " + movieId + ", date: " + startOfDay);
 
-        showtimeRepository.getShowtimesByMovieId(movieId, new ShowtimeRepository.ShowtimeCallback<List<Showtime>>() {
+        showtimeRepository.getShowtimesByMovieId(movieId, new ShowtimeRepository.ShowtimeCallback<>() {
             @Override
             public void onSuccess(List<Showtime> result) {
                 Log.d(TAG, "Showtimes fetched: " + result.size());
@@ -174,7 +178,7 @@ public class ShowtimeSelectionActivity extends AppCompatActivity {
                         showtimes.add(showtime);
                     }
                 }
-                Collections.sort(showtimes, (s1, s2) -> s1.getStartTime().compareTo(s2.getStartTime()));
+                Collections.sort(showtimes, Comparator.comparing(Showtime::getStartTime));
                 updateShowtimesList();
             }
 
@@ -196,50 +200,32 @@ public class ShowtimeSelectionActivity extends AppCompatActivity {
                 cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR);
     }
 
-    private void setupShowtimesList() {
-        ArrayAdapter<Showtime> adapter = new ArrayAdapter<Showtime>(this,
-                android.R.layout.simple_list_item_1, showtimes) {
-            @Override
-            public View getView(int position, View convertView, android.view.ViewGroup parent) {
-                TextView textView = (TextView) super.getView(position, convertView, parent);
-                Showtime showtime = showtimes.get(position);
-                String theatreName = (showtime.getTheatre() != null) ? showtime.getTheatre().getName() : "Rạp không xác định";
-                String displayText = String.format("%s - %s (%s) - %s",
-                        timeFormat.format(showtime.getStartTime()),
-                        theatreName,
-                        showtime.getFormat(),
-                        showtime.getLanguage());
-                textView.setText(displayText);
-                textView.setOnClickListener(v -> {
-                    Intent intent = new Intent(ShowtimeSelectionActivity.this, SeatActivity.class);
-                    showtime.setMovie(movie);
-                    intent.putExtra(Constants.EXTRA_SHOWTIME, showtime);
-                    startActivity(intent);
-                });
-                return textView;
-            }
-        };
-        lvShowtimes.setAdapter(adapter);
-    }
-
     private void updateShowtimesList() {
         Log.d(TAG, "Updating showtimes list with " + showtimes.size() + " items");
-        ArrayAdapter adapter = (ArrayAdapter) lvShowtimes.getAdapter();
-        if (adapter != null) {
-            adapter.notifyDataSetChanged();
-        } else {
-            Log.e(TAG, "Adapter is null, cannot update showtimes list");
-        }
+        // Get theature list that contain suitable showtime
+        // 1) Collect theatre IDs into a Set (faster .contains() than a List)
+        Set<String> theatreIdSet = showtimes.stream()
+                .map(Showtime::getTheatreId)
+                .collect(Collectors.toSet());
+
+        // 2) Filter the map’s values based on that Set
+        List<Theatre> theatreList = theatreMap.values().stream()
+                .filter(t -> theatreIdSet.contains(t.getId()))
+                .collect(Collectors.toList());
+
+        // 3) Pass to adapter
+        theatreAdapter = new TheatreAdapter(theatreList, showtimes, this);
+        rvTheatres.setAdapter(theatreAdapter);
+
+        // Typically a vertical list of theaters
+        rvTheatres.setLayoutManager(new LinearLayoutManager(this));
     }
     private void setupDateRecyclerView() {
         // Create an adapter, pass in availableDates
-        DateAdapter dateAdapter = new DateAdapter(availableDates, new DateAdapter.OnDateClickListener() {
-            @Override
-            public void onDateClicked(Date date, int position) {
-                // Same logic as spinner onItemSelected
-                Log.d(TAG, "Clicked date: " + dateFormat.format(date));
-                fetchShowtimesForDate(date);
-            }
+        DateAdapter dateAdapter = new DateAdapter(availableDates, (date, position) -> {
+            // Same logic as spinner onItemSelected
+            Log.d(TAG, "Clicked date: " + dateFormat.format(date));
+            fetchShowtimesForDate(date);
         });
 
         recyclerDates.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
