@@ -20,64 +20,71 @@
         app:titleTextColor="#000000"
         />
 
-    <!-- Top Center Label -->
-    <TextView
-        android:id="@+id/tvCenter"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="132dp"
-        android:text="Màn hình"
-        android:textColor="@android:color/darker_gray"
-        android:textSize="18sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/linearLayout"
+        app:layout_constraintEnd_toStartOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar2" />
+        app:layout_constraintTop_toBottomOf="@+id/toolbar2">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <!-- Top Center Label -->
+            <TextView
+                android:id="@+id/tvCenter"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="60dp"
+                android:layout_marginBottom="20dp"
+                android:layout_gravity="center_horizontal"
+                android:text="Màn hình"
+                android:textColor="@android:color/darker_gray"
+                android:textSize="18sp"
+                 />
+            <View
+                android:id="@+id/curvedLine"
+                android:layout_width="300dp"
+                android:layout_height="2dp"
+                android:layout_marginBottom="48dp"
+                android:layout_gravity="center_horizontal"
+                android:background="@android:color/darker_gray"
+                 />
 
-    <View
-        android:id="@+id/curvedLine"
-        android:layout_width="300dp"
-        android:layout_height="2dp"
-        android:layout_marginBottom="12dp"
-        android:background="@android:color/darker_gray"
-        app:layout_constraintBottom_toTopOf="@+id/tvCenter"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.495"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar2"
-        app:layout_constraintVertical_bias="1.0" />
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/seatRecyclerView"
+                android:layout_width="374dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="20dp"
+                android:padding="8dp"
+                app:layout_constraintBottom_toTopOf="@+id/btnBuy"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.4"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/curvedLine"
+                app:layout_constraintVertical_bias="0.318" />
+        </LinearLayout>
 
+    </ScrollView>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/seatRecyclerView"
-        android:layout_width="374dp"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginTop="20dp"
-        android:padding="8dp"
-        app:layout_constraintBottom_toTopOf="@+id/btnBuy"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.4"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/curvedLine"
-        app:layout_constraintVertical_bias="0.318" />
 
 
     <LinearLayout
+        android:id="@+id/linearLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="44dp"
+        android:gravity="center_horizontal"
         android:orientation="horizontal"
         app:layout_constraintBottom_toTopOf="@+id/btnBuy"
-        tools:layout_editor_absoluteX="0dp"
-        android:gravity="center_horizontal"
-        >
+        tools:layout_editor_absoluteX="0dp">
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            >
+            android:gravity="center_vertical">
 
             <ImageView
                 android:layout_width="36dp"
@@ -89,17 +96,15 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Ghế chưa đặt"
-                />
+                android:text="Ghế chưa đặt" />
 
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="center_vertical"
             android:layout_marginStart="5dp"
-            >
+            android:gravity="center_vertical">
 
             <ImageView
                 android:layout_width="36dp"
@@ -111,17 +116,15 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Ghế đã chọn"
-                />
+                android:text="Ghế đã chọn" />
 
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:gravity="center_vertical"
             android:layout_marginStart="5dp"
-            >
+            android:gravity="center_vertical">
 
             <ImageView
                 android:layout_width="36dp"
@@ -138,6 +141,36 @@
         </LinearLayout>
 
 
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="2"
+        android:paddingStart="24dp"
+        android:paddingBottom="12dp"
+        app:layout_constraintBottom_toTopOf="@+id/btnBuy">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="Tạm tính:"
+            android:layout_weight="1"
+            android:textStyle="bold"
+            android:textSize="20sp"
+            android:textColor="@color/black" />
+        <TextView
+            android:id="@+id/tvTempPrice"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="30.000"
+            android:layout_weight="1"
+            android:gravity="end"
+            android:textStyle="bold"
+            android:layout_marginEnd="24dp"
+            android:textSize="20sp"
+            android:textColor="@color/black" />
     </LinearLayout>
 
     <Button

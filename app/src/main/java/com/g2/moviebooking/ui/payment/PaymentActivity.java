@@ -1,5 +1,7 @@
 package com.g2.moviebooking.ui.payment;
 
+import static android.view.View.INVISIBLE;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.StrictMode;
@@ -10,6 +12,7 @@ import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -28,6 +31,7 @@ import com.g2.moviebooking.utils.Constants;
 
 import org.json.JSONObject;
 
+import java.io.Serializable;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -42,10 +46,11 @@ import vn.zalopay.sdk.ZaloPaySDK;
 import vn.zalopay.sdk.listeners.PayOrderListener;
 
 public class PaymentActivity extends AppCompatActivity {
-    TextView tvAmount, selectedSeatsText, tvCinemaName, tvFilmName,
+    TextView tvAmount, selectedSeatsText, tvCinemaName, tvFilmName, tvComboName,
             tvShowtime, tvFormat, tvScreen, tvMovieDescription;
     ImageView imgFilm;
     Button btnCheckout;
+    CardView tvComboSection;
     
     // Booking information
     private double totalAmount;
@@ -79,7 +84,9 @@ public class PaymentActivity extends AppCompatActivity {
         tvFormat = findViewById(R.id.tvFormat);
         tvScreen = findViewById(R.id.tvScreen);
         tvMovieDescription = findViewById(R.id.tvMovieDescription);
+        tvComboName = findViewById(R.id.tvComboName);
         imgFilm = findViewById(R.id.imgFilm);
+        tvComboSection = findViewById(R.id.tvComboSection);
 
         StrictMode.ThreadPolicy policy = new
                 StrictMode.ThreadPolicy.Builder().permitAll().build();
@@ -163,7 +170,14 @@ public class PaymentActivity extends AppCompatActivity {
         totalAmount = seatPrice + foodPrice;
 
         // Get list food items
-        foodItems = (ArrayList<FoodDrink>) intent.getSerializableExtra(Constants.EXTRA_FOOD_DRINKS_ITEMS);
+        Serializable extra = intent.getSerializableExtra(Constants.EXTRA_FOOD_DRINKS_ITEMS);
+
+        if (extra != null) {
+            foodItems = (ArrayList<FoodDrink>) extra;
+        } else {
+            // Handle the null case if needed
+            Log.e(TAG, "No food items were passed in the intent.");
+        }
 
         // Get selected seats
         selectedSeats = intent.getStringArrayExtra(Constants.EXTRA_SELECTED_SEATS);
@@ -261,6 +275,8 @@ public class PaymentActivity extends AppCompatActivity {
             rvCombos.setAdapter(comboAdapter);
             Log.d(TAG, "onCreate: RecyclerView adapter set with " + foodItems.size() + " items");
         } else {
+            tvComboName.setVisibility(INVISIBLE);
+            tvComboSection.setVisibility(INVISIBLE);
             Log.d(TAG, "onCreate: No food items to display");
         }
     }

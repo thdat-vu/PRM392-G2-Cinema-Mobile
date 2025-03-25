@@ -3,6 +3,7 @@ package com.g2.moviebooking.ui.bookings;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -31,6 +32,7 @@ public class SeatActivity extends AppCompatActivity {
     private double totalAmount = Constants.BASE_TOTAL_AMOUNT;
     private NumberFormat currencyFormatter;
     private Showtime showtime;
+    private TextView tvTempPrice;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +46,7 @@ public class SeatActivity extends AppCompatActivity {
         // Initialize views
         seatRecyclerView = findViewById(R.id.seatRecyclerView);
         btnBuy = findViewById(R.id.btnBuy);
+        tvTempPrice = findViewById(R.id.tvTempPrice);
         
         // Set initial button text
         updateBuyButtonText();
@@ -92,7 +95,7 @@ public class SeatActivity extends AppCompatActivity {
     
     private void updateBuyButtonText() {
         String formattedAmount = currencyFormatter.format(totalAmount);
-        btnBuy.setText("Mua " + formattedAmount);
+        tvTempPrice.setText(formattedAmount);
         
         // Disable button if no seats selected
         btnBuy.setEnabled(totalAmount > 0);
