@@ -1,15 +1,21 @@
 package com.g2.moviebooking.data.repository;
 
-import com.g2.moviebooking.data.model.Showtime;
+import static android.content.ContentValues.TAG;
+
+import android.util.Log;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.Query;
-import com.google.type.Date;
+import com.google.firebase.firestore.Transaction;
+import com.g2.moviebooking.data.model.Showtime;
+import com.g2.moviebooking.utils.FirebaseClient;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class ShowtimeRepository {
     private final FirebaseFirestore db;
+    private static final String TAG = "ShowtimeRepository";
 
     public ShowtimeRepository() {
         db = FirebaseFirestore.getInstance();
@@ -60,59 +66,66 @@ public class ShowtimeRepository {
                 .addOnFailureListener(e -> callback.onFailure(e.getMessage()));
     }
 
-    // Thêm method để update seats
-    public void updateSeats(String showtimeId, List<String> selectedSeats,
-                            ShowtimeCallback<Showtime> callback) {
-        // Lấy document reference
-        db.collection("showtimes_refactored").document(showtimeId)
-                .get()
-                .addOnSuccessListener(documentSnapshot -> {
-                    Showtime showtime = documentSnapshot.toObject(Showtime.class);
-                    if (showtime != null) {
-                        showtime.setId(documentSnapshot.getId());
+    public void updateSeats(String showtimeId, List<String> selectedSeats, ShowtimeCallback<Showtime> callback) {
+        // Kiểm tra dữ liệu đầu vào
+        if (showtimeId == null || showtimeId.isEmpty()) {
+            Log.e(TAG, "Showtime ID is null or empty");
+            callback.onFailure("Showtime ID is null or empty");
+            return;
+        }
 
-                        // Kiểm tra các ghế đã chọn có trong bookedSeats không
-                        List<String> alreadyBooked = new ArrayList<>();
-                        List<String> currentBooked = showtime.getBookedSeats() != null ?
-                                showtime.getBookedSeats() : new ArrayList<>();
-                        List<String> currentAvailable = showtime.getAvailableSeats() != null ?
-                                showtime.getAvailableSeats() : new ArrayList<>();
+        if (selectedSeats == null || selectedSeats.isEmpty()) {
+            Log.e(TAG, "Selected seats list is null or empty");
+            callback.onFailure("Selected seats list is null or empty");
+            return;
+        }
 
-                        for (String seat : selectedSeats) {
-                            if (currentBooked.contains(seat)) {
-                                alreadyBooked.add(seat);
-                            }
-                        }
+        // Log dữ liệu đầu vào
+        Log.d(TAG, "Attempting to update seats for showtime: " + showtimeId);
+        Log.d(TAG, "Selected seats: " + selectedSeats);
 
-                        // Nếu có ghế đã được đặt, trả về lỗi
-                        if (!alreadyBooked.isEmpty()) {
-                            String errorMessage = "The following seats are already booked: " +
-                                    String.join(", ", alreadyBooked);
-                            callback.onFailure(errorMessage);
-                            return;
-                        }
+        // Tham chiếu đến document
+        DocumentReference showtimeRef = db.collection("showtimes_refactored").document(showtimeId);
 
-                        // Cập nhật danh sách ghế
-                        currentAvailable.removeAll(selectedSeats);
-                        currentBooked.addAll(selectedSeats);
+        // Sử dụng transaction để đảm bảo tính toàn vẹn dữ liệu
+        db.runTransaction((Transaction transaction) -> {
+            // Lấy document trong transaction
+            Showtime showtime = transaction.get(showtimeRef).toObject(Showtime.class);
 
-                        // Update Firestore
-                        db.collection("showtimes_refactored").document(showtimeId)
-                                .update(
-                                        "availableSeats", currentAvailable,
-                                        "bookedSeats", currentBooked
-                                )
-                                .addOnSuccessListener(aVoid -> {
-                                    showtime.setAvailableSeats(currentAvailable);
-                                    showtime.setBookedSeats(currentBooked);
-                                    callback.onSuccess(showtime);
-                                })
-                                .addOnFailureListener(e -> callback.onFailure(e.getMessage()));
-                    } else {
-                        callback.onFailure("Showtime not found");
-                    }
-                })
-                .addOnFailureListener(e -> callback.onFailure(e.getMessage()));
+            // Gán ID cho showtime
+            assert showtime != null;
+            showtime.setId(showtimeRef.getId());
+
+            // Khởi tạo danh sách nếu null
+            List<String> currentBooked = showtime.getBookedSeats() != null ?
+                    new ArrayList<>(showtime.getBookedSeats()) : new ArrayList<>();
+            List<String> currentAvailable = showtime.getAvailableSeats() != null ?
+                    new ArrayList<>(showtime.getAvailableSeats()) : new ArrayList<>();
+
+            // Log trạng thái hiện tại
+            Log.d(TAG, "Current booked seats: " + currentBooked);
+            Log.d(TAG, "Current available seats: " + currentAvailable);
+
+            // Cập nhật danh sách ghế
+            currentAvailable.removeAll(selectedSeats);
+            currentBooked.addAll(selectedSeats);
+
+            // Cập nhật document trong transaction
+            transaction.update(showtimeRef, "availableSeats", currentAvailable);
+            transaction.update(showtimeRef, "bookedSeats", currentBooked);
+
+            // Cập nhật showtime object để trả về
+            showtime.setAvailableSeats(currentAvailable);
+            showtime.setBookedSeats(currentBooked);
+
+            return showtime;
+        }).addOnSuccessListener(showtime -> {
+            Log.d(TAG, "Seats updated successfully for showtime: " + showtime.getId());
+            callback.onSuccess(showtime);
+        }).addOnFailureListener(e -> {
+            Log.e(TAG, "Failed to update seats: " + e.getMessage());
+            callback.onFailure("Failed to update seats: " + e.getMessage());
+        });
     }
 
     // Interface callback
