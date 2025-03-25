@@ -55,6 +55,7 @@
         <activity android:name=".ui.ShowtimeSelectionActivity" />
         <activity android:name=".ui.bookings.SeatActivity" />
         <activity android:name=".ui.auth.RegisterActivity" />
+        <activity android:name=".ui.ProfileActivity" />
         <activity
             android:name=".ui.payment.PaymentNotificationActivity"
             android:exported="true" />
