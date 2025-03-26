@@ -171,7 +171,7 @@ public class ProfileActivity extends AppCompatActivity {
                 showCustomToast("Chức năng rạp chưa được triển khai", false);
                 return true;
             } else if (itemId == R.id.nav_tickets) {
-                startActivity(new Intent(this, TicketsActivity.class));
+                startActivity(new Intent(this, BookingHistoryListActivity.class));
                 finish();
                 return true;
             } else if (itemId == R.id.nav_profile) {

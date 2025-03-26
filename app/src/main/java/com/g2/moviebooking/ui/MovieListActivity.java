@@ -177,7 +177,7 @@ public class MovieListActivity extends AppCompatActivity {
                 showToast("Chức năng rạp chưa được triển khai");
                 return true;
             } else if (itemId == R.id.nav_tickets) {
-                startActivity(new Intent(this, TicketsActivity.class));
+                startActivity(new Intent(this, BookingHistoryListActivity.class));
                 return true;
             } else if (itemId == R.id.nav_profile) {
                 startActivity(new Intent(this, ProfileActivity.class));
