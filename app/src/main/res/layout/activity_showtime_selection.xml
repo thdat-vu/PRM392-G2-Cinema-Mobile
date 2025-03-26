@@ -80,12 +80,10 @@
         android:paddingBottom="8dp"
         android:layout_marginStart="16dp"/>
 
-    <ListView
-        android:id="@+id/lv_showtimes"
+    <!-- Outer RecyclerView for the list of theaters -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvTheatres"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:divider="@android:color/darker_gray"
-        android:dividerHeight="1dp"/>
+        android:layout_height="match_parent" />
 
 </LinearLayout>
