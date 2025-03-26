@@ -11,7 +11,8 @@ import java.util.List;
 import java.util.Locale;
 
 public class TicketDetailActivity extends AppCompatActivity {
-    private TextView tvMovieTitle, tvTheatreName, tvShowtime, tvSeats, tvBookingCode, tvTotalAmount, tvFoodItems;
+    private TextView tvMovieTitle, tvTheatreName, tvShowtime, tvSeats, tvBookingCode, tvTotalAmount, tvFoodItems,
+            tvPaymentMethod, tvPaymentStatus, tvTransactionId, tvTransactionTime, tvStatus;
     private FoodAndDrinkRepository foodRepo;
 
     @Override
@@ -38,6 +39,11 @@ public class TicketDetailActivity extends AppCompatActivity {
         tvBookingCode = findViewById(R.id.ticket_detail_booking_code);
         tvTotalAmount = findViewById(R.id.ticket_detail_total_amount);
         tvFoodItems = findViewById(R.id.ticket_detail_food_items);
+        tvPaymentMethod = findViewById(R.id.ticket_detail_payment_method);
+        tvPaymentStatus = findViewById(R.id.ticket_detail_payment_status);
+        tvTransactionId = findViewById(R.id.ticket_detail_transaction_id);
+        tvTransactionTime = findViewById(R.id.ticket_detail_transaction_time);
+        tvStatus = findViewById(R.id.ticket_detail_status);
     }
 
     private void displayTicketDetail(Booking booking) {
@@ -52,6 +58,12 @@ public class TicketDetailActivity extends AppCompatActivity {
                 ? dateFormat.format(booking.getShowtime().getStartTime()) : "Không xác định";
         String seatsText = (booking.getSeats() != null) ? String.join(", ", booking.getSeats()) : "Không có ghế";
         String bookingCodeText = (booking.getBookingCode() != null) ? booking.getBookingCode() : "Không có mã";
+        String paymentMethodText = (booking.getPaymentMethod() != null) ? booking.getPaymentMethod() : "Không xác định";
+        String paymentStatusText = (booking.getPaymentStatus() != null) ? booking.getPaymentStatus() : "Không xác định";
+        String transactionIdText = (booking.getTransactionId() != null) ? booking.getTransactionId() : "Không có";
+        String transactionTimeText = (booking.getTransactionTime() != null)
+                ? dateFormat.format(booking.getTransactionTime()) : "Không có";
+        String statusText = (booking.getStatus() != null) ? booking.getStatus() : "Không xác định";
 
         tvMovieTitle.setText(movieTitle);
         tvTheatreName.setText(theatreName);
@@ -59,6 +71,11 @@ public class TicketDetailActivity extends AppCompatActivity {
         tvSeats.setText(seatsText);
         tvBookingCode.setText(bookingCodeText);
         tvTotalAmount.setText(String.format(vnLocale, "%,d VNĐ", (long) booking.getTotalAmount()));
+        tvPaymentMethod.setText(paymentMethodText);
+        tvPaymentStatus.setText(paymentStatusText);
+        tvTransactionId.setText(transactionIdText);
+        tvTransactionTime.setText(transactionTimeText);
+        tvStatus.setText(statusText);
 
         // Lấy thông tin foodItems từ FoodAndDrinkRepository
         if (booking.getFoodItems() != null && !booking.getFoodItems().isEmpty()) {
