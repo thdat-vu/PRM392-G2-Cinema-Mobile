@@ -1,70 +1,105 @@
 # Movie Booking App
 
-Ứng dụng Android đơn giản cho phép người dùng xem danh sách phim, chi tiết phim và đăng nhập bằng Google để truy cập. Ứng dụng sử dụng Firebase để quản lý dữ liệu và xác thực.
+A simple Android application that allows users to log in with Google, browse a list of movies, view detailed movie information, select showtimes, and book tickets. The app leverages Firebase for data management and authentication.
 
-## Tính năng chính
-- **Đăng nhập bằng Google**: Xác thực người dùng qua Firebase Authentication.
-- **Danh sách phim**: Hiển thị danh sách phim từ Firestore trong RecyclerView dạng ngang với phân trang.
-- **Chi tiết phim**: Xem thông tin chi tiết của phim bằng cách nhấn đúp vào mục trong danh sách.
+## Main Features
+- **Google Login**: Authenticate users via Firebase Authentication using Google Sign-In.
+- **Movie List**: Display a paginated list of movies from Firestore in a horizontal RecyclerView with a banner slider.
+- **Movie Details**: View detailed movie information (title, description, genres, etc.) by double-tapping a movie in the list.
+- **Showtime Selection**: Browse available showtimes by date and theater, with location-based sorting.
+- **Booking**: Create bookings with seat selection, food/drink options, and payment status tracking.
+- **Profile Management**: Update user information (name, phone) and log out.
+- **Booking History**: View a list of past bookings.
 
-## Công nghệ
-- **Ngôn ngữ**: Java
+## Technologies Used
+- **Language**: Java
 - **Framework**: Android SDK
 - **Database**: Firebase Firestore
 - **Authentication**: Firebase Authentication (Google Sign-In)
-- **Hình ảnh**: Glide (tải và hiển thị banner phim)
+- **Image Loading**: Glide (for movie banners and theater logos)
+- **Location Services**: Google Play Services (FusedLocationProviderClient for theater distance calculation)
+- **Asynchronous Programming**: CompletableFuture for fetching food/drink items
 
-## Cài đặt
-1. Clone repository:
+## Setup Instructions
+1. **Clone the repository**:
    ```
    git clone <repository_url>
    ```
-2. Thêm file `google-services.json` vào thư mục `app/` (tải từ Firebase Console).
-3. Sync project với Gradle:
+2. **Add Firebase configuration**:
+   - Download the `google-services.json` file from the Firebase Console.
+   - Place it in the `app/` directory of the project.
+3. **Sync the project with Gradle**:
    ```
    ./gradlew build
    ```
-4. Chạy ứng dụng trên emulator hoặc thiết bị thật.
+4. **Run the app**:
+   - Launch the app on an Android emulator or a physical device via Android Studio.
 
-## Cấu trúc thư mục
+## Directory Structure
 ```
 com.g2.moviebooking
 ├── data
 │   ├── model
-│   │   ├── Movie.java       # Model phim với các thuộc tính như tiêu đề, mô tả, thể loại...
-│   │   └── User.java        # Model người dùng với tên và email
+│   │   ├── Booking.java     # Booking model with showtime, seats, payment details
+│   │   ├── Movie.java       # Movie model with title, description, genres, etc.
+│   │   ├── Showtime.java    # Showtime model with theater, time, and seat availability
+│   │   ├── Theatre.java     # Theater model with name, address, location coordinates
+│   │   └── User.java        # User model with name, email, and phone
 │   └── repository
-│       ├── AuthRepository.java  # Xử lý đăng nhập Google và lưu user vào Firestore
-│       └── MovieRepository.java # Truy vấn danh sách phim và chi tiết phim
+│       ├── AuthRepository.java      # Handles Google login and user data storage
+│       ├── BookingRepository.java   # Manages booking creation and updates
+│       ├── FoodAndDrinkRepository.java # Fetches food/drink options
+│       ├── MovieRepository.java     # Queries movie list and details
+│       ├── ShowtimeRepository.java  # Retrieves showtimes and updates seat availability
+│       └── TheatreRepository.java   # Fetches theater information
 ├── ui
 │   ├── auth
-│   │   └── LoginActivity.java   # Màn hình đăng nhập Google
-│   ├── MovieAdapter.java        # Adapter cho RecyclerView hiển thị danh sách phim
-│   ├── MovieDetailActivity.java # Hiển thị chi tiết phim
-│   └── MovieListActivity.java   # Danh sách phim với phân trang
+│   │   └── LoginActivity.java       # Google login screen
+│   ├── MovieAdapter.java            # Adapter for RecyclerView movie list
+│   ├── MovieDetailActivity.java     # Displays movie details
+│   ├── MovieListActivity.java       # Movie list with pagination and search
+│   ├── ProfileActivity.java         # User profile management
+│   ├── ShowtimeSelectionActivity.java # Showtime selection by date and theater
+│   └── bookings
+│       └── BookingHistoryListActivity.java # Displays booking history
 └── utils
-    └── FirebaseClient.java       # Singleton khởi tạo FirebaseAuth và Firestore
+    ├── Constants.java               # App-wide constants (e.g., PAGE_SIZE)
+    ├── FirebaseClient.java          # Singleton for FirebaseAuth and Firestore
+    └── LocationUtils.java           # Utility for fetching device location
 ```
 
-## Cách hoạt động
-1. **LoginActivity**: 
-   - Sử dụng Google Sign-In để xác thực.
-   - Lưu thông tin người dùng (tên, email) vào Firestore sau khi đăng nhập thành công.
-2. **MovieListActivity**: 
-   - Tải danh sách phim từ Firestore với phân trang (10 phim/trang).
-   - Sử dụng RecyclerView ngang với PagerSnapHelper để hiển thị.
-   - Tự động tải thêm phim khi người dùng cuộn gần cuối danh sách.
-3. **MovieDetailActivity**: 
-   - Hiển thị chi tiết phim (tiêu đề, mô tả, thể loại, đạo diễn, diễn viên...) khi nhấn đúp vào phim.
-   - Sử dụng Glide để tải banner phim.
+## How It Works
+1. **LoginActivity**:
+   - Uses Google Sign-In for authentication.
+   - Saves user data (name, email) to Firestore upon successful login.
+2. **MovieListActivity**:
+   - Loads movies from Firestore with pagination (10 movies per page).
+   - Displays movies in a horizontal RecyclerView with a PagerSnapHelper and a banner slider.
+   - Supports search by movie title and automatic loading of additional movies on scroll.
+3. **MovieDetailActivity**:
+   - Displays detailed movie information (title, description, genres, etc.) when a movie is double-tapped.
+   - Uses Glide to load movie banners.
+4. **ShowtimeSelectionActivity**:
+   - Fetches showtimes for a selected movie, filtered by date.
+   - Displays theaters with available showtimes, sorted by distance using the device's location.
+5. **Booking Process**:
+   - Users select seats and optional food/drink items for a showtime.
+   - BookingRepository creates a booking with a unique code and calculates the total amount.
+   - Payment status is updated upon confirmation (e.g., "PENDING" to "PAID").
+6. **ProfileActivity**:
+   - Displays and allows editing of user information (name, phone).
+   - Handles logout functionality.
+7. **BookingHistoryListActivity**:
+   - Shows a list of the user's past bookings, ordered by booking date.
 
 ## TODO
-- [ ] Thêm tính năng đặt vé (chọn rạp, giờ chiếu, ghế ngồi).
-- [ ] Tích hợp cổng thanh toán (ví dụ: Stripe, PayPal).
-- [ ] Thêm bộ lọc phim theo thể loại, đánh giá hoặc ngày phát hành.
-- [ ] Cải thiện giao diện (thêm animation khi chuyển màn hình, hỗ trợ dark mode).
-- [ ] Thêm xử lý lỗi mạng và lưu trữ offline bằng Room hoặc SharedPreferences.
+- [ ] Integrate a payment gateway (e.g., Stripe, PayPal) for completing transactions.
+- [ ] Add movie filters by genre, rating, or release date in MovieListActivity.
+- [ ] Enhance UI with animations for screen transitions and support for dark mode.
+- [ ] Implement network error handling and offline storage using Room or SharedPreferences.
+- [ ] Add theater search and filtering options in ShowtimeSelectionActivity.
 
-## Góp ý
-- Hiện tại ứng dụng chỉ hỗ trợ xem danh sách và chi tiết phim. Để biến nó thành ứng dụng đặt vé hoàn chỉnh, cần thêm logic đặt vé và giao diện tương ứng.
-- Có thể tích hợp API bên thứ ba như The Movie Database (TMDb) để làm phong phú dữ liệu phim.
+## Suggestions
+- **API Integration**: Consider integrating a third-party API like The Movie Database (TMDb) to enrich movie data with trailers, reviews, and additional metadata.
+- **Enhanced Booking**: Add features like seat selection previews, real-time seat availability updates, and cancellation options.
+- **User Experience**: Implement push notifications for booking confirmations and upcoming showtime reminders.
