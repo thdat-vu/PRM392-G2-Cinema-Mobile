@@ -24,7 +24,8 @@
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:orientation="vertical"
-            android:layout_marginStart="8dp">
+            android:layout_marginStart="8dp"
+            android:layout_weight="4">
 
             <TextView
                 android:id="@+id/tvTheatreName"
@@ -42,18 +43,32 @@
                 android:textSize="12sp" />
 
         </LinearLayout>
-
         <!-- "Bạn ở gần rạp này" if applicable -->
         <TextView
             android:id="@+id/tvNearYou"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Bạn ở gần rạp này"
-            android:visibility="gone"
+            android:visibility="visible"
             android:textSize="12sp"
-            android:layout_gravity="center_vertical"
+            android:layout_gravity="top"
             android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
             android:textColor="@android:color/holo_red_dark" />
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            >
+            <!-- Button to display theatre location -->
+            <Button
+                android:id="@+id/btnShowMap"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:text="View Map"
+                android:backgroundTint="@color/colorPrimary"/>
+        </LinearLayout>
+
+
     </LinearLayout>
 
     <!-- Format/language label, e.g. "2D phụ đề" -->
