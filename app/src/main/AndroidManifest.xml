@@ -21,7 +21,7 @@
         <!-- Meta-data for Google Maps API -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyD9hRo03U1qmOHeMLiLDNPSxluaPY9T0mk" />
+            android:value="${GOOGLE_MAPS_API_KEY}" />
         <activity
             android:name=".ui.bookings.FoodDrinksActivity"
             android:exported="false" />
