@@ -3,6 +3,13 @@ plugins {
     id 'com.google.gms.google-services'
 }
 
+// Add this at the top of the dependencies block
+def localProperties = new Properties()
+localProperties.load(new FileInputStream(rootProject.file("local.properties")))
+def zaloPayLibDir = localProperties.getProperty('zalopay.lib.dir', '')
+def googleMapsApiKey = localProperties.getProperty('google_maps_api_key') ?: "DEFAULT_API_KEY"
+
+
 android {
     namespace 'com.g2.moviebooking'
     compileSdk 35
@@ -15,6 +22,7 @@ android {
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        manifestPlaceholders = [GOOGLE_MAPS_API_KEY: googleMapsApiKey]
     }
 
     buildTypes {
@@ -29,12 +37,6 @@ android {
         targetCompatibility JavaVersion.VERSION_11
     }
 }
-
-// Add this at the top of the dependencies block
-def localProperties = new Properties()
-localProperties.load(new FileInputStream(rootProject.file("local.properties")))
-def zaloPayLibDir = localProperties.getProperty('zalopay.lib.dir', '')
-
 
 dependencies {
     implementation libs.appcompat
