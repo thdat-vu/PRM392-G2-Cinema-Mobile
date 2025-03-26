@@ -1,6 +1,8 @@
 package com.g2.moviebooking.ui;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -13,8 +15,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -23,6 +27,9 @@ import com.g2.moviebooking.adapter.TheatreAdapter;
 import com.g2.moviebooking.data.model.Movie;
 import com.g2.moviebooking.ui.bookings.SeatActivity;
 import com.g2.moviebooking.utils.Constants;
+import com.g2.moviebooking.utils.LocationUtils;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.g2.moviebooking.R;
@@ -63,6 +70,11 @@ public class ShowtimeSelectionActivity extends AppCompatActivity {
     private SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
     private RecyclerView rvTheatres;
     private TheatreAdapter theatreAdapter;
+    private FusedLocationProviderClient fusedLocationProviderClient;
+    private double currentLatitude;
+    private double currentLongitude;
+    private static final int LOCATION_PERMISSION_REQUEST_CODE = 101;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -103,11 +115,55 @@ public class ShowtimeSelectionActivity extends AppCompatActivity {
         // Load all theatres upfront
         loadTheatres();
 
+        // Get current location
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+        checkLocationPermissionAndFetch();
+
+
+
         // Setup UI
         setupDateRecyclerView();
-        updateShowtimesList();
 
         btnBack.setOnClickListener(v -> onBackPressed());
+    }
+    private void checkLocationPermissionAndFetch() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // Request permissions if not already granted
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
+                    LOCATION_PERMISSION_REQUEST_CODE);
+        } else {
+            // Permissions are granted; now fetch the current location using your utility class
+            LocationUtils.getCurrentLocation(this, fusedLocationProviderClient, new LocationUtils.LocationCallback() {
+                @Override
+                public void onLocationResult(double latitude, double longitude) {
+                    currentLatitude = latitude;
+                    currentLongitude = longitude;
+                    Log.d(TAG, "Current location: " + latitude + ", " + longitude);
+                    updateShowtimesList();
+                }
+
+                @Override
+                public void onLocationFailure(Exception e) {
+                    Log.e(TAG, "Failed to get current location", e);
+                }
+            });
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission granted; try to fetch the location again.
+                checkLocationPermissionAndFetch();
+            } else {
+                Toast.makeText(this, "Location permission denied", Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
     private List<Date> generateDateList() {
@@ -203,7 +259,7 @@ public class ShowtimeSelectionActivity extends AppCompatActivity {
     private void updateShowtimesList() {
         Log.d(TAG, "Updating showtimes list with " + showtimes.size() + " items");
         // Get theature list that contain suitable showtime
-        // 1) Collect theatre IDs into a Set (faster .contains() than a List)
+        // 1) Collect theatre IDs into a Set
         Set<String> theatreIdSet = showtimes.stream()
                 .map(Showtime::getTheatreId)
                 .collect(Collectors.toSet());
@@ -214,7 +270,7 @@ public class ShowtimeSelectionActivity extends AppCompatActivity {
                 .collect(Collectors.toList());
 
         // 3) Pass to adapter
-        theatreAdapter = new TheatreAdapter(theatreList, showtimes, this);
+        theatreAdapter = new TheatreAdapter(theatreList, showtimes, this, currentLatitude, currentLongitude);
         rvTheatres.setAdapter(theatreAdapter);
 
         // Typically a vertical list of theaters

@@ -35,6 +35,16 @@ public class Theatre implements Serializable {
     @SerializedName("email")
     private String email;
 
+    private float distance;
+
+    public float getDistance() {
+        return distance;
+    }
+
+    public void setDistance(float distance) {
+        this.distance = distance;
+    }
+
     // Constructors
     public Theatre() {
     }
